@@ -1,6 +1,6 @@
 <?php
 
-use yii\db\Migration;
+ use yii\db\Migration;
 use common\models\User;
 
 class m130524_201442_init extends Migration
@@ -25,7 +25,6 @@ class m130524_201442_init extends Migration
         $user->username = 'admin';
         $user->setPassword('admin');
         $user->generateAuthKey();
-        $user->generatePasswordResetToken();
         $user->save();
     }
 
