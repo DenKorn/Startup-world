@@ -2,8 +2,10 @@
 
 namespace frontend\controllers;
 
+
 use Yii;
 use common\models\ForumMessages;
+use yii\web\Response;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -44,40 +46,14 @@ class DiscussionsController extends Controller
         ]);
     }
 
-    public function actionAjaxExpandBranch($id, $levels = 1)
+    public function actionAjaxLoadBranch($id, $levels = 1)
     {
-        Yii::$app->response->format = Yii::
-        $respond = [];
-        if(Yii::$app->request->isAjax) {
-
-        } else
-    }
-
-    public function actionTest($id)
-    {
-        $messages = $dataProvider = new ActiveDataProvider([
-            'query' => ForumMessages::find()->where(['root_theme_id' => $id]),
-        ]);
-        $models = $messages->getModels();
-        $subModels = $models[0]->getSubjectedMessages()->all();
-        foreach ($subModels as $model) {
-            var_dump($model->getAttributes());
-        }
-        //var_dump($messages->getModels());
-    }
-
-
-
-    /**
-     * Displays a single ForumMessages model.
-     * @param integer $id
-     * @return mixed
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        //if(Yii::$app->request->isAjax) {
+            $model = ForumMessages::findOne($id);
+            return $model->getTreeStruct($levels);
+       // }
+       // return $this->redirect(['index', 'id' => $id]);
     }
 
     /**
@@ -128,21 +104,5 @@ class DiscussionsController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the ForumMessages model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return ForumMessages the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = ForumMessages::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
     }
 }

@@ -1,0 +1,77 @@
+#container {
+	box-sizing: content-box;
+	padding-right: 20px;
+	background: lightgray;
+	font-size: 0.8em;
+	width: 800px;
+	font-family: Verdana,sans-serif;
+}
+
+.message-container {
+	margin-left: 1.5em;
+}
+
+.message-text {
+	display: block;
+	//background: red;
+	font-size: 1.1em;
+}
+
+.message-user {
+	font-size: 0.9em;
+	display: inline-block;
+	font-weight: bold;
+}
+
+.voting {
+	float: right;
+	//background: blue;
+	height: 1.4em;
+	margin-right: 0.5em;
+}
+
+.message-block {
+	//background: green;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+
+.message-created-time {
+	display: inline-block;
+	font-size: .7em;
+	font-style: italic;
+}
+
+.voting .rate {
+	font-size: 1.2em;
+	color: grey;
+}
+
+.message-respond {
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+.message-header {
+	height: 1.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+}
+
+.triangle-up {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-left: 0.4em solid transparent;
+	border-right: 0.4em solid transparent;
+	border-bottom: 0.8em solid grey;
+}
+
+.triangle-down {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-left: 0.4em solid transparent;
+	border-right: 0.4em solid transparent;
+	border-top: 0.8em solid grey;
+}
