@@ -41,4 +41,9 @@ class ForumRoots extends \yii\db\ActiveRecord
             'title' => 'Title',
         ];
     }
+
+    public function getRootMessage()
+    {
+        return $this->isNewRecord ?  new ForumMessages() : $this->hasOne(ForumMessages::className(),['root_theme_id' => 'id']);
+    }
 }

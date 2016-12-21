@@ -42,7 +42,7 @@ AppAsset::register($this);
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = ['label' => 'Создать тему', 'url' => 'forum/create-theme'];
+        $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
         $menuItems[] = ['label' => 'Профиль', 'url' => ['/contacts/index']];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')

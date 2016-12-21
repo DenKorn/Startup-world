@@ -1,8 +1,8 @@
 <?php
 use yii\helpers\Html;
-use yii\helpers\HtmlPurifier;
 ?>
 
 <div class="news-item">
-    <h2><?= Html::a($model->title,'discussions?id='.$model->id) ?></h2>
+    <h3><?= Html::a($model->title,'discussions?id='.$model->id) ?></h3>
+    <h4><?= Html::a($model->getRootMessage()->one()->content,'') ?></h4>
 </div>

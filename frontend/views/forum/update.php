@@ -6,9 +6,6 @@ use yii\helpers\Html;
 /* @var $model common\models\ForumRoots */
 
 $this->title = 'Update Forum Roots: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Forum Roots', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="forum-roots-update">
 

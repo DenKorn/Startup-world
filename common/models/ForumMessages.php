@@ -51,4 +51,9 @@ class ForumMessages extends \yii\db\ActiveRecord
             'content' => 'Content',
         ];
     }
+
+    public function getSubjectedMessages()
+    {
+        return $this->hasMany(ForumMessages::className(),['parent_message_id' => 'id']);
+    }
 }

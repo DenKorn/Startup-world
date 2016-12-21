@@ -52,7 +52,7 @@ class ForumController extends Controller
      */
     public function actionDiscussions($id)
     {
-        return $this->render('view', [
+        return $this->render('view-discussions', [
             'model' => $this->findModel($id),
         ]);
     }
@@ -60,17 +60,28 @@ class ForumController extends Controller
     public function actionCreateTheme()
     {
         $themeModel = new ForumRoots();
-        $msgModel = new ForumMessages();
-        if($themeModel->load(Yii::$app->request->post()) && $msgModel->load(Yii::$app->request->post()) && $themeModel->save()){
+        $msgModel = $themeModel->getRootMessage();
+        $params = Yii::$app->request->post();
+
+        if(isset($params['ForumRoots']) && isset($params['ForumMessages'])) {
+            $themeModel->load($params);
+            $msgModel->load($params);
+            return $this->redirect('http://www.google.com');
+        } else
+            return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
+        /*if($themeModel->load(Yii::$app->request->post()) && $msgModel->load(Yii::$app->request->post()) && $themeModel->save()){
             $msgModel->user_id = Yii::$app->user->id;
             $msgModel->root_theme_id = $themeModel->id;
             $msgModel->save();
             return $this->redirect([]); //todo редирект на страницу темы
         } else
             return 0; //форма добавления новой темы
-        
+*/
+       // var_dump(Yii::$app->request->post());
+
     }
 
+    ///образец для загрузки
     public function actionLoad($content) {
         var_dump(Yii::$app->request->get());
         $model = new ForumMessages();

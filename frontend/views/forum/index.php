@@ -15,6 +15,10 @@ $this->title = 'Темы форума';
     <?= \yii\widgets\ListView::widget([
         'dataProvider' => $dataProvider,
         'itemView' => '_list',
+        'emptyText' => 'Список пуст',
+        'emptyTextOptions' => [
+            'tag' => 'p'
+        ],
         'pager' => [
             'firstPageLabel' => 'first',
             'lastPageLabel' => 'last',

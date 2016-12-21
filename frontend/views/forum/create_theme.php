@@ -4,18 +4,16 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model common\models\ForumRoots */
+/* @var $msgModel common\models\ForumRoots */
+/* @var $themeModel common\models\ForumRoots */
 
-$this->title = 'Create Forum Roots';
-$this->params['breadcrumbs'][] = ['label' => 'Forum Roots', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'Создать новую тему';
 ?>
+
 <div class="forum-roots-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
+    <?= $this->render('_form', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]) ?>
 
 </div>

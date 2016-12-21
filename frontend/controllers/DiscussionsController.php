@@ -12,7 +12,7 @@ use yii\filters\VerbFilter;
 /**
  * ForumMessagesController implements the CRUD actions for ForumMessages model.
  */
-class ForumMessagesController extends Controller
+class DiscussionsController extends Controller
 {
     /**
      * @inheritdoc
@@ -33,16 +33,40 @@ class ForumMessagesController extends Controller
      * Lists all ForumMessages models.
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex($id)
     {
         $dataProvider = new ActiveDataProvider([
-            'query' => ForumMessages::find(),
+            'query' => ForumMessages::find()->where(['root_theme_id' => $id]),
         ]);
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);
     }
+
+    public function actionAjaxExpandBranch($id, $levels = 1)
+    {
+        Yii::$app->response->format = Yii::
+        $respond = [];
+        if(Yii::$app->request->isAjax) {
+
+        } else
+    }
+
+    public function actionTest($id)
+    {
+        $messages = $dataProvider = new ActiveDataProvider([
+            'query' => ForumMessages::find()->where(['root_theme_id' => $id]),
+        ]);
+        $models = $messages->getModels();
+        $subModels = $models[0]->getSubjectedMessages()->all();
+        foreach ($subModels as $model) {
+            var_dump($model->getAttributes());
+        }
+        //var_dump($messages->getModels());
+    }
+
+
 
     /**
      * Displays a single ForumMessages model.
