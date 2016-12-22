@@ -45,18 +45,6 @@ class ForumController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single ForumRoots model.
-     * @param integer $id
-     * @return mixed
-     */
-    public function actionDiscussions($id)
-    {
-        return $this->render('view-discussions', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
     public function actionCreateTheme()
     {
         $themeModel = new ForumRoots();
