@@ -118,3 +118,24 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+
+/*для кнопки "вверх"*/
+
+.btn-scroll-up {
+    position: fixed;
+    right: 50px;
+    bottom: -60px;
+    z-index: 2;
+    transition: .3s ease;
+}
+
+.btn-gone-down {
+    bottom: 50px;
+}
+
+/* фикс для правильного размера кнопки "logout" */
+
+.forum-logout-btn-fix {
+    margin: 0 !important;
+    line-height: 2em !important;
+}
