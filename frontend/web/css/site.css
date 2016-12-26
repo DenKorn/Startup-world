@@ -138,4 +138,5 @@ a.desc:after {
 .forum-logout-btn-fix {
     margin: 0 !important;
     line-height: 2em !important;
+    text-transform: none !important;
 }

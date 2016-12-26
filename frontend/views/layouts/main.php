@@ -30,7 +30,7 @@ $siteBundle = MaterialAsset::register($this);
         'brandLabel' => 'Startup world',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
-            'class' => 'navbar navbar-default', //navbar-inverse navbar-fixed-top
+            'class' => 'navbar navbar-default navbar-fixed-top', // прежнее: navbar-inverse navbar-fixed-top
         ],
     ]);
     $menuItems = [
@@ -62,6 +62,9 @@ $siteBundle = MaterialAsset::register($this);
     <div class="container">
         <?= Alert::widget() ?>
         <?= $content ?>
+    </div>
+    <div class="btn-scroll-up">
+        <a href="javascript:void(0)" class="btn btn-default btn-fab"><i class="material-icons">arrow_upward</i></a>
     </div>
 </div>
 

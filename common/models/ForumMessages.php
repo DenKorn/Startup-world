@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use DateTime;
 use stdClass;
 use Yii;
 use yii\base\Object;
@@ -58,18 +59,31 @@ class ForumMessages extends \yii\db\ActiveRecord
     protected function getNodeSubjects($nodeModel, $levels) {
         $tree = new stdClass();
         $attribs = $nodeModel->getAttributes();
-        $tree->user_id = $attribs['user_id']; //TODO: дополнять инфой о пользователях это поле
+        $tree->user_id = $attribs['user_id'];
+        $user = User::findOne($tree->user_id);
+        $tree->user_login = $user ? $user->username : null;
+        //TODO добавить инфу о рейтинге сообщения (rating) и роли пользователя (user_role)
+        $tree->user_role = 0; //0 - обычный пользователь, 1 - модератор, 2 - администратор
+        $tree->rating = 15;
+        $tree->voting_choise = 0; // -1 - дизлайк, 0 - не оценивал, 1 - лайк// todo Если пользователь уже голосовал - нужно получить его выбор
+        $MAX_DAYS_SINCE_CREATED = 1;     //todo время, допустимое для редактирования сообщения подтягивать из таблицы настроек в БД
+
+        $time_now = new DateTime();
+        $time_created_at = new DateTime($attribs['created_at']);
+        $interval = $time_now->diff($time_created_at,true)->days; //todo корректировку по часовым поясам
+
+        $tree->editable = $interval < $MAX_DAYS_SINCE_CREATED && $tree->user_id == Yii::$app->user->id;
+        $tree->msg_id = $attribs['id'];
+        //$tree->parent_msg_id = $attribs['parent_message_id']; //пока не требуется
         $tree->created_at = $attribs['created_at'];
         $tree->content = $attribs['content'];
         $tree->subjected = [];
-        if($levels > 0) {
-            $subjected = $nodeModel->getSubjectedMessages()->all();
-            if($subjected) {
-                foreach ($subjected as $subjModel) {
-                    array_push($tree->subjected, $this->getNodeSubjects($subjModel, $levels-1));
-                }
+        $subjected = $nodeModel->getSubjectedMessages()->all();
+        $tree->subjected_count = $subjected ? count($subjected) : 0;
+        if($levels > 0 && $subjected) {
+            foreach ($subjected as $subjModel) {
+                array_push($tree->subjected, $this->getNodeSubjects($subjModel, $levels-1));
             }
-
         }
         return $tree;
     }
