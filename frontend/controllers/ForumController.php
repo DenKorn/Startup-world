@@ -48,25 +48,25 @@ class ForumController extends Controller
     public function actionCreateTheme()
     {
         $themeModel = new ForumRoots();
-        $msgModel = $themeModel->getRootMessage();
         $params = Yii::$app->request->post();
-
+        $msgModel = new ForumMessages();
         if(isset($params['ForumRoots']) && isset($params['ForumMessages'])) {
             $themeModel->load($params);
-            $msgModel->load($params);
-            return $this->redirect('http://www.google.com');
-        } else
+            $tmLeng = strlen($themeModel->title);
+            if($tmLeng <= 150) {
+                if($tmLeng >= 1) {
+                    $msgModel->load($params);
+                    if($themeModel->save()) {
+                        $msgModel->root_theme_id = $themeModel->id;
+                        $msgModel->user_id = Yii::$app->user->id;
+                        if($msgModel->save()) {
+                            return $this->redirect(['discussions/index','id'=>$themeModel->id]);
+                        } //todo и ещё сообщение об ошибке, выводить параметром в отображение, который будет активировать показывание специального элемента с текстом сообщения
+                    }// return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]); //todo Добавить сообщения об ошибке
+                }// return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
+            } // return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
+        } else //todo серьезно, сообщения об ошибках надо выводить
             return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
-        /*if($themeModel->load(Yii::$app->request->post()) && $msgModel->load(Yii::$app->request->post()) && $themeModel->save()){
-            $msgModel->user_id = Yii::$app->user->id;
-            $msgModel->root_theme_id = $themeModel->id;
-            $msgModel->save();
-            return $this->redirect([]); //todo редирект на страницу темы
-        } else
-            return 0; //форма добавления новой темы
-*/
-       // var_dump(Yii::$app->request->post());
-
     }
 
     ///образец для загрузки
