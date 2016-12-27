@@ -86,7 +86,7 @@ function renderElement(element) {
 
     //дообавление кнопки "раскрыть ветку"
     let open_branch = (element.subjected.length === 0 && element.subjected_count > 0) ?
-        `<a onclick="expandBranch(${element.msg_id})" class="btn btn-default message-expand-btn btn-xs">Открыть(${element.subjected_count})</a>`
+        `<a onclick="expandBranch(${element.msg_id})" class="btn btn-default message-expand-btn btn-xs">Открыть <span class="badge">${element.subjected_count}</span></a>`
         : '';
 
     //добавление кнопки "редактировать"

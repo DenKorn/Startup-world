@@ -38,7 +38,7 @@ class ForumController extends Controller
     {
         $searchModel = new ForumRootsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->pagination->pageSize = 15; //todo установка количетсва тем на одной странице
+        $dataProvider->pagination->pageSize = 15; //установка количетсва тем на одной странице
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,

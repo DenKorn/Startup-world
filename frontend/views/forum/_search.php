@@ -8,18 +8,6 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="form-group label-floating">
-    <label class="control-label" for="addon2">Floating label w/right addon</label>
-    <div class="input-group">
-        <input type="text" id="addon2" class="form-control">
-        <span class="input-group-btn">
-      <button type="button" class="btn btn-fab btn-fab-mini">
-        <i class="material-icons">search</i>
-      </button>
-    </span>
-    </div>
-</div>
-
 <div class="forum-roots-search">
 
     <?php $form = ActiveForm::begin([
@@ -27,11 +15,14 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'title', ['template' => "{input}\n\n{hint}\n\n{error}"]) ?>
+        <div class="col-md-11">
+            <?= $form->field($model, 'title', ['template' => "{input}\n\n{hint}\n\n{error}"]) ?>
+        </div>
+        <div class="col-md-1 center-block">
+            <br>
+            <?= Html::submitButton('<i class="material-icons">search</i>', ['class' => 'btn btn-fab btn-fab-mini']) ?>
+        </div>
 
-    <div class="form-group">
-        <?= Html::submitButton('Поиск по темам', ['class' => 'btn btn-primary']) ?>
-    </div>
 
     <?php ActiveForm::end(); ?>
 
