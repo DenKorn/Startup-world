@@ -178,9 +178,9 @@ class DiscussionsController extends Controller
                                 return ['result' => 'ok'];
                             } else return ['result' => 'error', 'code' => 4, 'message' => 'Не удалось удалить сообщение.'];
                         } else return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для удаляемого сообщения.'];
-                    } else return ['result' => 'error', 'code' => 2, 'message' => 'Вы пытаетесь редактировать чужое сообщение.'];
-                } else return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: ваш аккаунт заблокирован или не существует.'];
-            } else return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для обновления не найдено.'];
+                    } else return ['result' => 'error', 'code' => 2, 'message' => 'Вы пытаетесь удалить чужое сообщение.'];
+                } else return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно удалить сообщение: ваш аккаунт заблокирован или не существует.'];
+            } else return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для удаления не найдено.'];
         } else return $this->redirect(['forum/index']);
     }
 

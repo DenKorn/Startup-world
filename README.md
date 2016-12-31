@@ -1,55 +1,32 @@
-Yii 2 Advanced Project Template
+Форум "Startup World"
 ===============================
 
-Yii 2 Advanced Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-developing complex Web applications with multiple tiers.
+Данный проект был создан в рамках курсовой работы и проекта в личное портфолио.
 
-The template includes three tiers: front end, back end, and console, each of which
-is a separate Yii application.
+Сайт был разработан для Apache-серверов на языке PHP, базируясь на фреймворке Yii2 (Advanced template). В качестве СУБД использована MySQL.
 
-The template is designed to work in a team development environment. It supports
-deploying the application in different environments.
+Разработка и тестирование велось лишь с помощью локального сервера WAMP, поэтому автор не гарантирует корректную работу сайта на других серверных сборках.
 
-Documentation is at [docs/guide/README.md](docs/guide/README.md).
+Страница VK разработчика: [ссылка](https://vk.com/den_korn).
 
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/yii2-app-advanced/v/stable.png)](https://packagist.org/packages/yiisoft/yii2-app-advanced)
-[![Total Downloads](https://poser.pugx.org/yiisoft/yii2-app-advanced/downloads.png)](https://packagist.org/packages/yiisoft/yii2-app-advanced)
-[![Build Status](https://travis-ci.org/yiisoft/yii2-app-advanced.svg?branch=master)](https://travis-ci.org/yiisoft/yii2-app-advanced)
-
-DIRECTORY STRUCTURE
+Инструкция по установке
 -------------------
 
-```
-common
-    config/              contains shared configurations
-    mail/                contains view files for e-mails
-    models/              contains model classes used in both backend and frontend
-    tests/               contains tests for common classes    
-console
-    config/              contains console configurations
-    controllers/         contains console controllers (commands)
-    migrations/          contains database migrations
-    models/              contains console-specific model classes
-    runtime/             contains files generated during runtime
-backend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains backend configurations
-    controllers/         contains Web controller classes
-    models/              contains backend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for backend application    
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-frontend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains frontend configurations
-    controllers/         contains Web controller classes
-    models/              contains frontend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for frontend application
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-    widgets/             contains frontend widgets
-vendor/                  contains dependent 3rd-party packages
-environments/            contains environment-based overrides
-```
+Изначально предполагается, что на вашем компьютере уже установлен и сконфигурирован локальный сервер WAMP и установлен Composer с плагином "Сomposer asset plugin".
+
+1. Клонируем проект из репозитория в папку для исполнения ".../wamp/www". Для быстрого старта сайта без изменений в файлах конфигурации следует поместить проект в папку с именем "startup-forum". Таким образом, доступ к сайту с локальной машины будет осуществляться по ссылке: "http://localhost/startup-forum".
+
+2. Из корневой директории проекта вызываем в консоли команду "composer install". Это загрузит в папку "vendor" все необходимые библиотеки.
+
+3. Нужно создать базу данных для проекта. Для быстрого старта, запустим MySQL в консоли, введите команду:
+    "CREATE DATABASE `startup_forum`
+    DEFAULT CHARACTER SET utf8
+    DEFAULT COLLATE utf8_general_ci".
+    Это создаст БД под названием "startup_forum".
+
+4. Нужно применить миграции для установки схемы БД в актуальное для текущей версии проекта состояние. Сделать это можно, выполнив в консоли, из корневой директории проекта, команду: "yii migrate" и подтвердив их применение.
+
+Почему сайт назван именно "Startup forum"?
+-------------------
+
+Чёрт его знает, просто первая тематика, что пришла в голову :)

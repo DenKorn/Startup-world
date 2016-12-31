@@ -19,6 +19,7 @@ $siteBundle = MaterialAsset::register($this);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?= Html::csrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
+	<link href="favicon.ico" rel="icon" type="image/x-icon" />
     <?php $this->head() ?>
 </head>
 <body>
@@ -27,7 +28,7 @@ $siteBundle = MaterialAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'Startup world',
+        'brandLabel' =>  Html::img("@web/img/forum_logo.png",['class' => 'img-responsive block-center','style'=>"width:160px; margin-top:-5px"]),// 'Startup world',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar navbar-default navbar-fixed-top', // прежнее: navbar-inverse navbar-fixed-top
@@ -39,14 +40,14 @@ $siteBundle = MaterialAsset::register($this);
     ];
 
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
         $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
         $menuItems[] = ['label' => 'Профиль', 'url' => ['/contacts/index']];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
+                'Выйти (' . Yii::$app->user->identity->username . ')',
                 ['class' => 'btn btn-link logout forum-logout-btn-fix']
             )
             . Html::endForm()
