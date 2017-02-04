@@ -45,7 +45,7 @@ return [
         ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
-            'defaultRoles' => ['guest'],
+            'defaultRoles' => ['guest','user','moderator','admin'],
         ],
     ],
     'params' => $params,

@@ -28,7 +28,7 @@ class m170204_003736_roles_init extends Migration
         $rbac->addChild($moderator,$user);
         $rbac->addChild($user,$guest);
 
-        $rbac->assign($admin,1); // присвоим к самому первому и единственному на данный момент пользователю
+        $rbac->assign($admin,1); // присвоим к самому первому и единственному на данный момент пользователю статус админа
     }
 
     public function down()
