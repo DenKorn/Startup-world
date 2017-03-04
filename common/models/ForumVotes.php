@@ -3,6 +3,8 @@
 namespace common\models;
 
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\Query;
 
 /**
  * This is the model class for table "forum_votes".
@@ -37,6 +39,18 @@ class ForumVotes extends \yii\db\ActiveRecord
             [['msg_id'], 'exist', 'skipOnError' => true, 'targetClass' => ForumMessages::className(), 'targetAttribute' => ['msg_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
+    }
+
+    /**
+     * Считает рейтинг конкретного сообщения
+     *
+     * @param $msg_id int
+     * @return int
+     */
+    public static function getMessageSummaryRating($msg_id)
+    {
+        $querySumRes = (new Query())->select(['sum(value) as rating'])->from(self::tableName())->where(['msg_id' => $msg_id])->one()['rating'];
+        return $querySumRes ? $querySumRes : 0;
     }
 
     /**

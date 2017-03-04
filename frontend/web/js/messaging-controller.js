@@ -1,4 +1,6 @@
-;(function () {
+"use strict";
+
+var messagingController = (function () {
     /**
      * Created by Денис on 23.12.2016.
      * Заранее прошу не пугаться кода. Да, здесь стоило и можно было применить ООП с паттернами "Фабрика", "Команда", "Заместитель" и прочие прелести.
@@ -6,7 +8,7 @@
      */
 
 //для присваивания id к каждому создаваемому обьекту уведомления
-    lastUsedNotifyId = 0;
+   let lastUsedNotifyId = 0;
 
 //for messages interacting
     let lastInteractedMessageId = 0;
@@ -17,72 +19,120 @@
 
     const MODAL_ACTION_SEND = 0;
     const MODAL_ACTION_UPDATE = 1;
-
+    const VOTING_FOLD = 1;
 
     const msgContainer = document.querySelector('.messages-common-container');
 
-    function vote(id, action, value) {
-
+    /**
+     * Удаляет класс из элемента, если он был присвоен ему
+     *
+     * @param arrowElement Object
+     * @param classToRemove string
+     */
+    function removeClassIfContains(arrowElement, classToRemove) {
+        if(arrowElement.classList.contains(classToRemove)) {
+            arrowElement.classList.remove(classToRemove)
+        }
     }
 
     /**
-     * функция отправки запроса на сервер для лайка сообщения (оценка +1 в рейтинг)
-     * @param id
+     *
+     * @param voteCounterElement Object
+     * @param changed boolean
      */
-    function voteUp(id) {
+    function markVoteCounterAs(voteCounterElement, changed = true) {
+        if(changed) {
+            if(!voteCounterElement.classList.contains('rated-by-user')) {
+                voteCounterElement.classList.add('rated-by-user');
+            }
+        } else {
+            if(voteCounterElement.classList.contains('rated-by-user')) {
+                voteCounterElement.classList.remove('rated-by-user');
+            }
+        }
+    }
+
+    /**
+     * Обновляет содержимое контейнера .voting
+     *
+     * @param votingContainer Object
+     * @param newValue integer
+     * @param newRating integer
+     */
+    function setupVotingContainer(votingContainer, newValue, newRating) {
+        const ratingCount =  votingContainer.children[0];
+        const arrowUp = votingContainer.children[1];
+        const arrowDown = votingContainer.children[2];
+
+        if(ratingCount.innerHTML != newRating) {
+            ratingCount.innerHTML = newRating;
+        }
+
+        //обновление состояния кнопок лайка/дизлайка
+        switch (newValue) {
+            case -1:
+                removeClassIfContains(arrowUp,'triangle-up-selected');
+                arrowDown.classList.add('triangle-down-selected');
+                markVoteCounterAs(ratingCount, true);
+                break;
+            case 1:
+                removeClassIfContains(arrowDown,'triangle-down-selected');
+                arrowUp.classList.add('triangle-up-selected');
+                markVoteCounterAs(ratingCount, true);
+                break;
+            default:
+                markVoteCounterAs(ratingCount, false);
+                removeClassIfContains(arrowUp,'triangle-up-selected');
+                removeClassIfContains(arrowDown,'triangle-down-selected');
+        }
+    }
+
+    /**
+     * функция отправки запроса на сервер для установки рейтинга сообщения сообщения (оценка +1 или -1 в рейтинг)
+     *
+     * @param id integer
+     * @param direction string
+     */
+    function vote(id, direction) {
+
         let requestObj = {
             msg_id : id,
-            action : true ? 'set' : 'cancel'
+            value : null
         };
 
-        if(requestObj.action === 'set') requestObj.value = +1;
-
-        vote(id, action)
+        switch(direction) {
+            case 'up': requestObj.value = +VOTING_FOLD;
+                break;
+            case 'down': requestObj.value = -VOTING_FOLD;
+                break;
+            default: console.error('Некорректный параметр оценки: '+direction+'. Допустимы лишь варианты up и down');
+        }
 
         $.get(window.API_BASE_LINK+"update-voting",requestObj)
             .done((respond)=>{
-                if(respond.result = 'ok') {
-                    let targetMsgContainer = document.querySelector(`#message-${msg_id} .message-text`);
-                    if(targetMsgContainer) {
-                        targetMsgContainer.innerHTML = respond.new_content;
-                        notify(`Сообщение отправлено.`);
-                    } else {
-                        notify('Ошибка выполнения: не найден элемент для обновления (настучите админу по голове, чтобы передавал в ответе на запрос, на всякий случай, целый обьект обновленного сообщения).',NOTIFY_WARNING);
-                    }
-                } else if(respond.result = 'error') {
-                    notify(respond.message,NOTIFY_WARNING);
+                switch (respond.result) {
+                    case 'ok':
+                        notify(respond.message, NOTIFY_INFO);
+                        setupVotingContainer(
+                            document.querySelector(`#message-${id} .voting`),
+                            respond.newVote ? +respond.newVote : 0,
+                            respond.currentRating ? +respond.currentRating : 0
+                        );
+                        break;
+                    case 'error':
+                        notify(respond.message, NOTIFY_WARNING);
+                        if(respond.data) {
+                            console.error(respond.data);
+                        }
+                        break;
+                    default:
+                        console.error(`Непредвиденный результат ответа от сервера: "${respond}"`);
                 }
             })
             .fail((error)=>{console.log("message updating error: ",error);
-                notify("Не удалось обновить сообщение",NOTIFY_WARNING)});
-
-
-
-        //done:
-        notify(`Вы подняли рейтинг сообщения`,NOTIFY_INFO);
-        notify(`Голос отменён`,NOTIFY_INFO);
-        //fail:
-        notify(`Вы уже поднимали рейтинг этого сообщения!`,NOTIFY_WARNING);
+                notify("Не удалось изменить рейтинг сообщения",NOTIFY_WARNING)});
     }
 
-    /**
-     * функция отправки запроса на сервер для дизлайка сообщения (оценка -1 в рейтинг)
-     * @param id
-     */
-    function voteDown(id) {
-        let requestObj = {
-            msg_id : id,
-            action : true ? 'set' : 'cancel'
-        };
-        if(requestObj.action === 'set') requestObj.value = -1;
-        //todo дизлайк сообщению
-        //тоже аякс-запрос
-        //done:
-        notify(`Вы понизили рейтинг сообщения`,NOTIFY_INFO);
-        notify(`Голос отменён`,NOTIFY_INFO);
-        //fail:
-        notify(`Вы уже понижали рейтинг этого сообщения!`,NOTIFY_WARNING)
-    }
 
     /**
      * возвращает обьект сформированного DOM-блока с сообщением
@@ -115,8 +165,8 @@
 
         let voting_block = window.CLIENT_ID && (element.rating || element.rating === 0) ? `<div class="voting">
          <span class="rate">${element.rating}</span>
-         <div onclick="voteUp(${element.msg_id})" class="triangle-up"></div>
-         <div onclick="voteDown(${element.msg_id})" class="triangle-down"></div>
+         <div onclick="messagingController.vote(${element.msg_id}, 'up')" class="triangle-up"></div>
+         <div onclick="messagingController.vote(${element.msg_id}, 'down')" class="triangle-down"></div>
          </div>` : '';
 
         messageContainer.innerHTML = `
@@ -341,4 +391,9 @@
     }
 
     window.addEventListener('load', ()=>{init()});
+
+    return {
+        expandBranch : expandBranch,
+        vote : vote
+    }
 })();

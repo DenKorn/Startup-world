@@ -60,6 +60,10 @@
     color: orange;
 }
 
+.voting .rated-by-user {
+    color: red;
+}
+
 .message-respond:hover {
     text-decoration: underline;
 }
@@ -112,4 +116,12 @@
 
 .triangle-down:active {
     border-top-color: black;
+}
+
+.triangle-up-selected {
+    border-bottom-color: red;
+}
+
+.triangle-down-selected {
+    border-top-color: red;
 }

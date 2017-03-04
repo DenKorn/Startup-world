@@ -220,52 +220,45 @@ class DiscussionsController extends Controller
     }
 
     /**
-     * реализует голосование (лайк, убрать лайк, дизлайк, убрать дизлайк
-     * @param $msg_id
-     * @param string $action = {set,cancel}
-     * @param integer $value = {-1 - dislike, 0 - nothing, 1 - like}
+     * Функция обновляет рейтинг конкретного сообщения конкретным пользователем
+     * value = -1 (дизлайк), +1 (лайк)
+     *
+     * @param int $msg_id
+     * @param int $value
      * @return array|Response
      */
-    public function actionUpdateVoting($msg_id, $action, $value = 0, $user)
+    public function actionUpdateVoting($msg_id, $value = 0)
     {
         if(!Yii::$app->request->isAjax) {
-        //    return $this->redirect(['index']);
+                return $this->redirect(['index']);
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        if(abs($value) > 1 || $value == 0 /* || !Yii::$app->user */) { //todo раскомментить шалуна
+        if(abs($value) > 1 || $value == 0) {
             return ['result' => 'error', 'message' => 'Не играйся с API, шалун.)'];
         }
 
-        switch ($action) {
-            case "set" : {
-                //поиск уже поставленной оценки
-                //если поставлена такая же оценка - то выдать сообщение об ошибке
+        //поиск уже поставленной оценки конкретного сообщения конкретным пользователем
+        $settedVote = ForumVotes::findOne(['msg_id' => $msg_id, 'user_id' => Yii::$app->user->id]);
 
-                $settedVote = ForumVotes::findOne(['msg_id' => $msg_id, 'user_id' => $user]);
-                //$settedVote = ForumVotes::findOne(['msg_id' => $msg_id, 'user_id' => Yii::$app->user->id]);
-                if($settedVote) {
-                    if($settedVote->value == $value) {
-                        return ['result' => 'error', 'message' => 'Вы уже ставили оценку. Вы можете изменить её на '.($value == 1 ? 'дизлайк' : 'лайк')];
-                    }
-                    $settedVote->value = $value;
-                    //если поставлена другая оценка - изменить её и вернуть соббщение об успехе
-                    $settedVote->save();
-                }
-                $settedVote = new ForumVotes(['msg_id' => $msg_id, 'user_id' => $user, 'value' => $value]);
-                //$settedVote = new ForumVotes(['msg_id' => $msg_id, 'user_id' => Yii::$app->user->id, 'value' => $value]);
-                $settedVote->save();
-
-                return ['result' => 'success', 'message' => 'Вы '.($value == 1 ? 'подняли' : 'понизили').' рейтинг сообщения.'];
-                break;
+        if($settedVote) {
+            //в случае запроса повторной оценки удаляем из БД оценку
+            if($settedVote->value == $value) {
+                $settedVote->delete();
+                return ['result' => 'ok', 'message' => 'Отмена '.($value == 1 ? 'повышения' : 'понижения').' рейтинга.', 'newVote' => 0, 'currentRating' => ForumVotes::getMessageSummaryRating($msg_id)];
             }
-            case "cancel" : {
-                        //если оценка найдена - удалить её и вернуть положительный результат
-                        //если не найдена - сообщение об ошибке
-                        break;
-                    }
-            }
+            //иначе, если ставим противоположную оценку - обновляем величину оценки в существующей записи в таблице
+            $settedVote->value = $value;
+            if(!$settedVote->save()) return ['result' => 'error', 'message' => 'Ошибка изменения оценки', 'data' => $settedVote->getErrors()];
 
+            return ['result' => 'ok', 'message' => 'Рейтинг изменен на '.($value == 1 ? 'повышение' : 'понижение'), 'newVote' => $value, 'currentRating' => ForumVotes::getMessageSummaryRating($msg_id)];
+        }
+
+        $settedVote = new ForumVotes(['msg_id' => $msg_id, 'user_id' => Yii::$app->user->id, 'value' => $value]);
+
+        if(!$settedVote->save()) return ['result' => 'error', 'message' => 'Ошибка установки оценки', 'data' => $settedVote->getErrors()];
+
+        return ['result' => 'ok', 'message' => 'Вы '.($value == 1 ? 'подняли' : 'понизили').' рейтинг сообщения.', 'newVote' => $value, 'currentRating' => ForumVotes::getMessageSummaryRating($msg_id)];
     }
 }
