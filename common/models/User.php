@@ -24,6 +24,29 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_ACTIVE = 10;
 
 
+
+    public function registrate()
+    {
+
+        if ($this->getIsNewRecord() == false) {
+            throw new \RuntimeException('Calling "' . __CLASS__ . '::' . __METHOD__ . '" on existing user');
+        }
+
+        try {
+          //  $this->trigger(self::BEFORE_REGISTER);
+            if (!$this->save()) {
+                return false;
+            }
+
+            //$this->mailer->sendWelcomeMessage($this, isset($token) ? $token : null); TODO сделать отсылку письма
+           // $this->trigger(self::AFTER_REGISTER);
+            return true;
+        } catch (\Exception $e) {
+            \Yii::warning($e->getMessage());
+            throw $e;
+        }
+    }
+
     /**
      * @inheritdoc
      */
@@ -145,6 +168,15 @@ class User extends ActiveRecord implements IdentityInterface
     public function generateAuthKey()
     {
         $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+    public function setAttributes($values, $safeOnly = true)
+    {
+        $this->username = $values['username'];
+        $this->setPassword($values['password']);
+        $this->user_mail = $values['email'];
+        $this->generateAuthKey();
+        //todo добавить проверку корректности сохранения
     }
 
     /**

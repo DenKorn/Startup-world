@@ -2,7 +2,7 @@
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
-/* @var $model \common\models\LoginForm */
+/* @var $model \common\models\SignUpForm */
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
@@ -27,7 +27,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="form-group">
                     <?= Html::submitButton('Войти', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+                    <?= Html::a('Регистрация', 'sign-up', ['class' => 'btn btn-primary', 'name' => 'sign-up-button']) ?>
                 </div>
+
 
             <?php ActiveForm::end(); ?>
         </div>

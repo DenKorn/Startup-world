@@ -6,7 +6,10 @@ class m161219_001215_forum_init extends Migration
 {
     public function up()
     {
-        $commonOption = 'ENGINE = InnoDB';
+        $commonOption = null;
+        if ($this->db->driverName === 'mysql') {
+            $commonOption = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+        }
 
         //в parent_message_id может быть NULL только для корневых сообщений в темах
         $this->createTable('forum_messages',[

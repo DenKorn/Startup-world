@@ -56,6 +56,13 @@ class ForumMessages extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * Функция рекурсивно строит обьект сообщений для его отправки в загружаемую переписку
+     *
+     * @param $nodeModel ForumMessages
+     * @param $levels integer
+     * @return stdClass
+     */
     protected function getNodeSubjects($nodeModel, $levels) {
         $tree = new stdClass();
         $attribs = $nodeModel->getAttributes();
@@ -88,13 +95,28 @@ class ForumMessages extends \yii\db\ActiveRecord
         return $tree;
     }
 
-    public function getTreeStructById($root_id, $levels = 1)
+    /**
+     * Создаёт рекурсивно обьект сообщения с заданным $root_id, и все подчиненные ему обьекты
+     * до уровня $levels
+     *
+     * @param $root_id integer
+     * @param int $levels
+     * @return stdClass
+     */
+    public static function getTreeStructById($root_id, $levels = 1)
     {
-        $rootModel = static::findOne($root_id);
-        $tree = $this->getNodeSubjects($rootModel,$levels);
+        $rootModel = self::findOne($root_id);
+        $tree = self::getNodeSubjects($rootModel,$levels);
         return $tree;
     }
 
+    /**
+     * Создает рекурсивно обьект сообщения из данной модели, и подчиненных сообщений
+     * вплоть до уровня $levels
+     *
+     * @param int $levels
+     * @return null|stdClass
+     */
     public function getTreeStruct($levels = 1)
     {
         $tree = null;
@@ -104,6 +126,11 @@ class ForumMessages extends \yii\db\ActiveRecord
         return $tree;
     }
 
+    /**
+     * Получает подчиненные данной модели сообщения
+     *
+     * @return \yii\db\ActiveQuery
+     */
     public function getSubjectedMessages()
     {
         return $this->hasMany(ForumMessages::className(),['parent_message_id' => 'id']);

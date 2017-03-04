@@ -1,0 +1,5 @@
+{
+  "max_message_length" : 1500,
+  "min_message_length" : 2,
+  "still_editable_during_hours" : 24
+}

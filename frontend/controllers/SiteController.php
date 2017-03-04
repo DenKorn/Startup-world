@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use common\models\LoginForm;
+use common\models\SignUpForm;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -18,7 +19,7 @@ class SiteController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['login', 'error','index'],
+                        'actions' => ['login', 'error','index','sign-up'],
                         'allow' => true,
                     ],
                     [
@@ -70,6 +71,34 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
         return $this->goHome();
+    }
+
+    public function actionSignUp()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $userToSignUpForm = new SignUpForm();
+
+        //При отправке данных пытаемся регистрировать пользователя
+        if ($userToSignUpForm->load(Yii::$app->request->post()) && $userToSignUpForm->signUp()) {
+            return $this->goBack();
+        } else {
+            // Иначе выдаем ему пустую форму регистрации
+            return $this->render('sign_up',[
+                'model' => $userToSignUpForm
+            ]);
+        }
+        /*
+        $user = new User();
+        $user->username = 'admin';
+        $user->setPassword('admin');
+        $user->generateAuthKey();
+        $user->save();
+        */
+
+
     }
 
 }

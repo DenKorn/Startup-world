@@ -8,7 +8,7 @@ class m161227_171156_db_extending_1 extends Migration
     {
         echo "'user' table extending:\n";
 
-        $this->addColumn('user','user_mail','INT NOT NULL');
+        $this->addColumn('user','user_mail','VARCHAR(20) NOT NULL');
         $this->addColumn('user','role','VARCHAR(45) NULL');
         $this->addColumn('user','real_name','VARCHAR(60) NULL');
         $this->addColumn('user','real_surname','VARCHAR(60) NULL');
@@ -32,7 +32,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `startup_forum`.`forum_votes` (
   `user_id` INT NOT NULL,
   `msg_id` INT UNSIGNED NOT NULL,
-  `value` INT ZEROFILL NOT NULL,
+  `value` INT(4) NOT NULL DEFAULT \'0\',
   `setting_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`, `msg_id`))
 ENGINE = InnoDB;
