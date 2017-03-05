@@ -62,7 +62,7 @@ class ForumVotes extends \yii\db\ActiveRecord
      */
     public static function getAuthorizedUserChoiseForMessage($msg_id)
     {
-        if(Yii::$app->user) {
+        if(!Yii::$app->user->isGuest) {
             $queryRes = (new Query())->select('value')->from(self::tableName())->where(['user_id' => Yii::$app->user->id, 'msg_id' => $msg_id])->one()['value'];
             return $queryRes ? $queryRes : 0;
         } else

@@ -404,6 +404,14 @@ let messagingController = (function () {
         };
     }
 
+    /**
+     * Начальные настройки модуля. Если USER_ID не определен (либо эта настройка выключена) - личные сообщения пользователя не подсвечиваются
+     * todo много чего...
+     */
+    function initModule() {
+
+    }
+
     window.addEventListener('load', ()=>{init()});
 
     return {
