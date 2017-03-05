@@ -9,7 +9,7 @@ $this->title = 'Форум - '.$discussionTitle;
 <p style="margin:0"><strong>Содержание:</strong> <?= $rootMsgModel->content ?></p>
 <?php
 if($clientModel) { ?>
-<a onclick="prepareModal(<?= $rootMsgModel->msg_id ?>,MODAL_ACTION_SEND)" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>
+<a onclick="messagingController.prepareModal(<?= $rootMsgModel->msg_id ?>)" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>
 <?php } ?>
 <?php
 //todo добавить подключение кнопки редактирования

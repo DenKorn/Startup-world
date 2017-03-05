@@ -8,14 +8,13 @@ class m161227_171156_db_extending_1 extends Migration
     {
         echo "'user' table extending:\n";
 
-        $this->addColumn('user','user_mail','VARCHAR(20) NOT NULL');
+        $this->addColumn('user','user_mail','VARCHAR(200) NOT NULL');
         $this->addColumn('user','role','VARCHAR(45) NULL');
         $this->addColumn('user','real_name','VARCHAR(60) NULL');
         $this->addColumn('user','real_surname','VARCHAR(60) NULL');
         $this->addColumn('user','last_activity','TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP');
 
         echo "adding new tables :\n";
-        //todo добавить добавление оставшихся таблиц
 
         $this->execute('
         USE `startup_forum` ;
@@ -68,18 +67,17 @@ ENGINE = InnoDB;
         $this->dropForeignKey('fk_activities_to_users','forum_activity');
         $this->dropForeignKey('fk_activities_to_activity_types','forum_activity');
 
-        //todo deleting foreign keys
         $this->dropTable('forum_activity');
         $this->dropTable('forum_activity_types');
         $this->dropTable('forum_ban_list');
         $this->dropTable('forum_votes');
-        //todo добавить откат добавления оставшихся таблиц
 
         $this->dropColumn('user','user_mail');
         $this->dropColumn('user','role');
         $this->dropColumn('user','real_name');
         $this->dropColumn('user','real_surname');
         $this->dropColumn('user','last_activity');
+
         return true;
     }
 }

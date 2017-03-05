@@ -21,6 +21,8 @@ let messagingController = (function () {
     const MODAL_ACTION_UPDATE = 1;
     const VOTING_FOLD = 1;
 
+    const MODAL_MSG_INPUT_ELEMENT = document.querySelector('#respond-message');
+
     const msgContainer = document.querySelector('.messages-common-container');
 
     /**
@@ -70,12 +72,12 @@ let messagingController = (function () {
 
         //обновление состояния кнопок лайка/дизлайка
         switch (newValue) {
-            case -1:
+            case -VOTING_FOLD:
                 removeClassIfContains(arrowUp,'triangle-up-selected');
                 arrowDown.classList.add('triangle-down-selected');
                 markVoteCounterAs(ratingCount, true);
                 break;
-            case 1:
+            case +VOTING_FOLD:
                 removeClassIfContains(arrowDown,'triangle-down-selected');
                 arrowUp.classList.add('triangle-up-selected');
                 markVoteCounterAs(ratingCount, true);
@@ -236,6 +238,7 @@ let messagingController = (function () {
             }
             case MODAL_ACTION_UPDATE : {
                 document.querySelector('#myModal .modal-title').innerHTML = `Редактировать своё сообщение`;
+                MODAL_MSG_INPUT_ELEMENT.value = document.querySelector(`#message-${usedMessageId} .message-text`).innerHTML;
                 break;
             }
         }
@@ -334,9 +337,9 @@ let messagingController = (function () {
         const MAX_MSG_LENGTH = 1500;
         const MIN_MSG_LENGTH = 1;
         let inputValue = document.querySelector('#respond-message').value;
-        switch (currentAction) {
+        switch (currentAction) { //отправка сообщения
             case MODAL_ACTION_SEND : {
-                if(inputValue.length <= MAX_MSG_LENGTH) { //отправка сообщения
+                if(inputValue.length <= MAX_MSG_LENGTH) {
                     if(inputValue.length >= MIN_MSG_LENGTH) {
                         sendMessage(lastInteractedMessageId,inputValue);
                     } else errorLengthSmall('отправлено');
@@ -346,14 +349,18 @@ let messagingController = (function () {
             case MODAL_ACTION_UPDATE : { //обновление сообщения
                 if(inputValue.length <= MAX_MSG_LENGTH) {
                     if(inputValue.length >= MIN_MSG_LENGTH) {
-                        updateMessage(lastInteractedMessageId,inputValue);
+                        if(document.querySelector(`#message-${lastInteractedMessageId} .message-text`).innerHTML != inputValue) {
+                            updateMessage(lastInteractedMessageId,inputValue);
+                        } else {
+                            notify('Вы не изменили сообщение.',NOTIFY_INFO);
+                        }
                     } else errorLengthSmall('обновлено');
                 } else errorLength('обновить');
                 break;
             }
             default: console.log('В функции sendModal попытка вызова неопознанного действия(из величины currentAction)');
         }
-        //очистка формы через время
+        //очистка формы через время после её скрытия
         setTimeout(function(){document.querySelector('#respond-message').value=''},500);
     }
 
@@ -365,8 +372,8 @@ let messagingController = (function () {
              <a href="#" id="notify-close-btn-${id}" class="close" data-dismiss="alert" aria-label="close">×</a>
              <strong>${type == 0 ? 'Info' : 'Warning'}:</strong> ${message}
             </div>`;
-        setTimeout(()=>{document.querySelector('#notify-close-btn-'+id).parentNode.classList.add('in')},100);
-        setTimeout(()=>{document.querySelector('#notify-close-btn-'+id).click()},5000);
+        setTimeout(()=>{document.querySelector('#notify-close-btn-' + id).parentNode.classList.add('in')},100);
+        setTimeout(()=>{document.querySelector('#notify-close-btn-' + id).click()},5000);
         switch (type) {
             case 0: console.info(message); break;
             case 1: console.warn(message); break;
