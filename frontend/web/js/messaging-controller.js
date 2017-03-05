@@ -361,7 +361,9 @@ let messagingController = (function () {
             default: console.log('В функции sendModal попытка вызова неопознанного действия(из величины currentAction)');
         }
         //очистка формы через время после её скрытия
-        setTimeout(function(){document.querySelector('#respond-message').value=''},500);
+        setTimeout(function(){
+            document.querySelector('#respond-message').value=''
+        },500);
     }
 
 //функция добавления уведомления

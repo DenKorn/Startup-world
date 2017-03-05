@@ -35,6 +35,14 @@ if($clientModel) { ?>
         </div>
     </div>
 </div>
+
+<?= (!Yii::$app->user->id) ? "<div class=\"sign-advice-container\">
+        <p class=\"sign-advice-title\">Войдя, либо зарегистрировавшись, вы сможете принять участие в этой беседе.</p>
+        <p><a class=\"btn btn-primary btn-lg\" href='site\login'>Вход</a></p>
+        <p><a class=\"btn btn-primary btn-lg\" href='site\sign-up'>Регистрация</a></p>
+</div>" : "";
+?>
+
 <?php
 $id = ($clientModel) ? $clientModel->id : 'null';
 $login = ($clientModel) ? $clientModel->username : 'null';
