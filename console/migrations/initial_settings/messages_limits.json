@@ -1,5 +1,6 @@
 {
   "max_message_length" : 1500,
   "min_message_length" : 2,
-  "still_editable_during_hours" : 24
+  "still_editable_during_hours" : 4,
+  "max_subtree_download_depth" : 3
 }

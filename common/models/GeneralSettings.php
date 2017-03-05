@@ -19,7 +19,7 @@ class GeneralSettings extends \yii\db\ActiveRecord
      * Метод парсит строку "body" настроек из БД и возвращает полученный обьект
      *
      * @param string $name
-     * @return object
+     * @return \stdClass
      */
     public static function getSettingsObjByName($name)
     {

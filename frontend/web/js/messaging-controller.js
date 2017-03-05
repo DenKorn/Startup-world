@@ -1,6 +1,6 @@
 "use strict";
 
-var messagingController = (function () {
+let messagingController = (function () {
     /**
      * Created by Денис on 23.12.2016.
      * Заранее прошу не пугаться кода. Да, здесь стоило и можно было применить ООП с паттернами "Фабрика", "Команда", "Заместитель" и прочие прелести.
@@ -145,28 +145,28 @@ var messagingController = (function () {
 
         //дообавление кнопки "раскрыть ветку"
         let open_branch = (element.subjected.length === 0 && element.subjected_count > 0) ?
-            `<a onclick="expandBranch(${element.msg_id})" class="btn btn-default message-expand-btn btn-xs">Открыть <span class="badge">${element.subjected_count}</span></a>`
+            `<a onclick="messagingController.expandBranch(${element.msg_id})" class="btn btn-default message-expand-btn btn-xs">Открыть <span class="badge">${element.subjected_count}</span></a>`
             : '';
 
         //добавление кнопки "редактировать"
         let edit_btn = window.CLIENT_ID && element.editable ?
-            `<a onclick="prepareModal(${element.msg_id},MODAL_ACTION_UPDATE)" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Редактировать</a>`
+            `<a onclick="messagingController.prepareModal(${element.msg_id},${MODAL_ACTION_UPDATE})" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Редактировать</a>`
             : '';
 
         //добавление кнопки "удалить"
         let delete_btn = window.CLIENT_ID && element.editable ?
-            `<a onclick="deleteMessage(${element.msg_id})" class="btn btn-default btn-xs">Удалить</a>`
+            `<a onclick="messagingController.deleteMessage(${element.msg_id})" class="btn btn-default btn-xs">Удалить</a>`
             : '';
 
         //добавление кнопки "ответить"
         let respond_btn = window.CLIENT_ID ?
-            `<a onclick="prepareModal(${element.msg_id},MODAL_ACTION_SEND)" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>`
+            `<a onclick="messagingController.prepareModal(${element.msg_id},${MODAL_ACTION_SEND})" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>`
             : '';
 
         let voting_block = window.CLIENT_ID && (element.rating || element.rating === 0) ? `<div class="voting">
-         <span class="rate">${element.rating}</span>
-         <div onclick="messagingController.vote(${element.msg_id}, 'up')" class="triangle-up"></div>
-         <div onclick="messagingController.vote(${element.msg_id}, 'down')" class="triangle-down"></div>
+         <span class="rate${element.voting_choise == 0 ? '' : ' rated-by-user'}">${element.rating}</span>
+         <div onclick="messagingController.vote(${element.msg_id}, 'up')" class="triangle-up${element.voting_choise == VOTING_FOLD ? ' triangle-up-selected ' : ''}"></div> 
+         <div onclick="messagingController.vote(${element.msg_id}, 'down')" class="triangle-down${element.voting_choise == -VOTING_FOLD ? ' triangle-down-selected ' : ''}"></div>
          </div>` : '';
 
         messageContainer.innerHTML = `
@@ -202,8 +202,8 @@ var messagingController = (function () {
 // функция подгрузки через AJAX части переписки
 //инициируем подгрузку фрагмента JSON
 // По завершению выдаем либо уведомление об ошибке, либо сериализуем JSON и рендерим
-    function expandBranch(rootNodeId, branchLevels=1) {
-        $.get(window.API_BASE_LINK+"ajax-load-branch",{id:rootNodeId}) //убран levels:branchLevels, величина будет браться из сервера
+    function expandBranch(rootNodeId) {
+        $.get(window.API_BASE_LINK+"ajax-load-branch",{id:rootNodeId})
             .done(
                 (tree)=>{
                     console.log(tree);
@@ -367,6 +367,11 @@ var messagingController = (function () {
             </div>`;
         setTimeout(()=>{document.querySelector('#notify-close-btn-'+id).parentNode.classList.add('in')},100);
         setTimeout(()=>{document.querySelector('#notify-close-btn-'+id).click()},5000);
+        switch (type) {
+            case 0: console.info(message); break;
+            case 1: console.warn(message); break;
+            default: console.log(message); break;
+        }
     }
 
     function init() {
@@ -394,6 +399,9 @@ var messagingController = (function () {
 
     return {
         expandBranch : expandBranch,
-        vote : vote
+        vote : vote,
+        prepareModal: prepareModal,
+        sendModal : sendModal,
+        deleteMessage: deleteMessage
     }
 })();

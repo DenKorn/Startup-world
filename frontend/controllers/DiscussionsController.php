@@ -37,8 +37,11 @@ class DiscussionsController extends Controller
      * @param $id int
      * @return mixed
      */
-    public function actionIndex($id)
+    public function actionIndex($id = 0)
     {
+        if($id == 0) {
+            return $this->goBack();
+        }
         //проверка наличия запраиваемой темы форума (корневого сообщения):
         $rootMsgModel = ForumMessages::findOne(['root_theme_id' => $id]);
         if(!$rootMsgModel) {
@@ -75,22 +78,25 @@ class DiscussionsController extends Controller
     /**
      * Возвращает подветку сообщений в виде JSON-строки
      * @param $id
-     * @param int $levels
-     * @return null|\stdClass|Response
+     * @return \stdClass|Response|array
      */
-    public function actionAjaxLoadBranch($id, $levels = 3)
+    public function actionAjaxLoadBranch($id)
     {
+        if(!Yii::$app->request->isAjax) return $this->redirect(['index', 'id' => $id]);
+
         Yii::$app->response->format = Response::FORMAT_JSON;
-        if(Yii::$app->request->isAjax) {
-            $model = ForumMessages::findOne($id);
-            return $model->getTreeStruct($levels);
-        } else return $this->redirect(['index', 'id' => $id]);
+        $model = ForumMessages::findOne($id);
+        if(!$model) return ['status' => 'error', 'code' => 3, 'message' => 'Тема не найдена'];
+
+        $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
+        return $model->getTreeStruct($MSG_LIMITS->max_subtree_download_depth);
     }
 
     /**
      * Создание нового сообщения на форуме в ответ на одно какое-либо из созданных
      *
      * @param $respond_to int
+     * @param $content string
      * @return string
      */
      public function actionCreateMessage($respond_to, $content)
@@ -139,7 +145,6 @@ class DiscussionsController extends Controller
     public function actionUpdateMessage($id, $content)
     {
         //todo сделать поправку на текущий часовой пояс при сравнении (в базу пишется время по Гринвичу)
-        //todo максимальное количество прошедших часов для редактирования подтягивать из таблицы глобальных настроек, пока что это будет 5 часов
         //todo разрешить только через post
         //todo добавить цензурирование
         //todo позже добавить проверку, не находится ли залогиненный пользователь в бан-листе
@@ -162,7 +167,7 @@ class DiscussionsController extends Controller
         //проверка срока давности сообщения с момента создания
         $time_now = new DateTime();
         $time_created_at = new DateTime($targetMessage->created_at);
-        $interval = $time_now->diff($time_created_at,true)->h;
+        $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютная разность времени в часах
         if($interval > $MSG_LIMITS->still_editable_during_hours) return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для редактируемого сообщения.'];
 
         //проверка длины текста, слишком длинное или слишком короткое сообщение отказываемся сохранять
@@ -207,7 +212,7 @@ class DiscussionsController extends Controller
 
         $time_now = new DateTime();
         $time_created_at = new DateTime($targetMessage->created_at);
-        $interval = $time_now->diff($time_created_at,true)->h;
+        $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютное количество времени в часах
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
 
         //проверка срока давности с момента создания

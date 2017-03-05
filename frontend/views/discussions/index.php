@@ -29,7 +29,7 @@ if($clientModel) { ?>
                 <textarea class="form-control" rows="6" id="respond-message"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default send-btn" data-dismiss="modal" onclick="window.sendModal()">Отправить</button>
+                <button type="button" class="btn btn-default send-btn" data-dismiss="modal" onclick="messagingController.sendModal()">Отправить</button>
                 <button type="button" class="btn btn-default close-btn" data-dismiss="modal">Закрыть</button>
             </div>
         </div>

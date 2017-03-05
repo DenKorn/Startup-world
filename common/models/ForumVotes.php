@@ -54,6 +54,22 @@ class ForumVotes extends \yii\db\ActiveRecord
     }
 
     /**
+     * Получает величину выбора оценки авторизованного пользователя, на кокретном сообщении с id = $msg_id
+     * Возможные значения: -1 - дизлайк, 0 - не оценивал, 1 - лайк
+     *
+     * @param $msg_id int|string
+     * @return int|null
+     */
+    public static function getAuthorizedUserChoiseForMessage($msg_id)
+    {
+        if(Yii::$app->user) {
+            $queryRes = (new Query())->select('value')->from(self::tableName())->where(['user_id' => Yii::$app->user->id, 'msg_id' => $msg_id])->one()['value'];
+            return $queryRes ? $queryRes : 0;
+        } else
+            return null;
+    }
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
