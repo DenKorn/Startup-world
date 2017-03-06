@@ -101,6 +101,14 @@ window.CLIENT_ROLE = '$role';
 JS;
 
 $this->registerJs($script,$this::POS_HEAD);
+
+$requestInterval = \common\models\GeneralSettings::getSettingsObjByName('USER_NOTIFICATIONS')->notification_request_interval_in_seconds;
+
+$notifications_init_script = <<< NISCRIPT
+userNotifications.init($requestInterval);
+NISCRIPT;
+
+$this->registerJs($notifications_init_script, $this::POS_READY);
 ?>
 
 <?php $this->endBody() ?>

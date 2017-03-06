@@ -6,8 +6,8 @@ use common\models\SignUpForm;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\helpers\Url;
 use yii\web\Controller;
+use yii\web\Response;
 
 class SiteController extends Controller
 {
@@ -19,7 +19,7 @@ class SiteController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['login', 'error','index','sign-up'],
+                        'actions' => ['login', 'error','index','sign-up','check-notifications'],
                         'allow' => true,
                     ],
                     [
@@ -45,6 +45,31 @@ class SiteController extends Controller
                 'class' => 'yii\web\ErrorAction',
             ],
         ];
+    }
+
+    /**
+     * Формируем в ответ пользователю обьект с массивами alerts и warnings. Он должен содержать в себе сообщения либо обычные, либо с предупреждениями
+     * Уведомления берутся лишь достаточно свежие, перед завершением функции отправляемые уведомления удаляются из списка уведомлений в БД
+     *
+     * @return array
+     */
+    public function actionCheckNotifications()
+    {
+        //todo добавить инициирование отправки уведомлений на почту трем случайным пользователям (мегакостыль), которые давно не заходили на форум
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Не трогай API, ты не должен был видеть это сообщение. Скрипт не мог отправить этот запрос.'];
+
+        //Yii::$app->user->last_activity;
+
+        //todo создать таблицу списка уведомлений
+        //todo создать для неё модель
+        //todo Добавить в модель методы для получения ошибок и простых уведомлений
+        //todo если есть чё вывести - выводим с результатом "ок", иначе выдаем пустой ответ с результатом 'null'
+
+        return ['result' => 'ok', 'alerts' => ['Тебя лайкнули, аутист <a href="http://photo.qip.ru/photo/wp2/115887636/xlarge/141981340.jpg">Узнать, кто</a>']];
+
+        return ['result' => null];
     }
 
     public function actionIndex()

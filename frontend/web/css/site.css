@@ -154,3 +154,7 @@ a.desc:after {
     padding-right: 5px;
     padding-top: 5px;
 }
+
+.forum-alerts .alert > a:first-child ~ a {
+    color: green;
+}

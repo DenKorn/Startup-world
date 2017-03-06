@@ -26,6 +26,7 @@ class m170227_105708_settings_init extends Migration
 
         $this->batchInsert('general_settings', ['name', 'body'], [
             ['MESSAGES_LIMITS', file_get_contents($objectsPath.'messages_limits.json')],
+            ['USER_NOTIFICATIONS', file_get_contents($objectsPath.'user_notifications.json')],
             //todo дописать импорт всех остальных настроек сюда
         ]);
     }

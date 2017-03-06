@@ -9,16 +9,10 @@
  */
 let userNotifications = (function () {
 
-    let lastUsedNotifyId = 0;
+    const NOTIFY_INFO = 0;
+    const NOTIFY_WARNING = 1;
 
-    /**
-     * При опросе сервера ответ на запрос (a) может приходить позже, чем отправлен запрос (а+1), к примеру.
-     * Поэтому ведем учет идентификаторов запросов и ответов. В случае необходимости уменьшаем частоту запросов
-     *
-     * @type {number}
-     */
-    let lastRequestId = 0;
-    let lastResponseId = 0;
+    let lastUsedNotifyId = 0;
 
     /**
      * функция добавления уведомления (также идет вывод в консоль)
@@ -27,34 +21,75 @@ let userNotifications = (function () {
      * @param message string
      * @param type int {{0, 1}}
      */
-    function notify(message, type = 0) {
+    function notify(message, type = NOTIFY_INFO) {
         let id = lastUsedNotifyId++;
         document.querySelector('.forum-alerts').innerHTML +=
-            `<div class="alert ${type == 0 ? 'alert-info' : 'alert-warning'} alert-dismissable fade">
+            `<div class="alert ${type == NOTIFY_INFO ? 'alert-info' : 'alert-warning'} alert-dismissable fade">
              <a href="#" id="notify-close-btn-${id}" class="close" data-dismiss="alert" aria-label="close">×</a>
-             <strong>${type == 0 ? 'Info' : 'Warning'}:</strong> ${message}
+             <strong>${type == NOTIFY_INFO ? 'Info' : 'Warning'}:</strong> ${message}
             </div>`;
-        setTimeout(()=>{document.querySelector('#notify-close-btn-' + id).parentNode.classList.add('in')},100);
-        setTimeout(()=>{document.querySelector('#notify-close-btn-' + id).click()},5000);
+        setTimeout(()=>{
+            let notificationNode = document.querySelector('#notify-close-btn-' + id).parentNode.classList;
+            if(notificationNode) {
+                notificationNode.add('in');
+            }
+        },100);
+        setTimeout(()=>{
+            let notificationNode = document.querySelector('#notify-close-btn-' + id);
+            if(notificationNode) {
+                notificationNode.click()
+            }
+        },5000);
+
         switch (type) {
-            case 0: console.info(message); break;
-            case 1: console.warn(message); break;
+            case NOTIFY_INFO: console.info(message); break;
+            case NOTIFY_WARNING: console.warn(message); break;
             default: console.log(message); break;
         }
     }
 
-    function askForUserNotifications() {
+    function showNotifications(notifications, notificationType = NOTIFY_INFO) {
+        notifications.forEach((item) => {
+            notify(item, notificationType);
+        });
+    }
 
+    function AJAXCallback(evt) {
+        let respond = JSON.parse(evt.target.responseText);
+        if(!respond.result) return;
+
+        switch (respond.result) {
+            case 'ok':
+                if(respond.alerts) showNotifications(respond.alerts, NOTIFY_INFO);
+                if(respond.warnings) showNotifications(respond.warnings, NOTIFY_WARNING);
+                break;
+            case 'error':
+                notify(respond.message, NOTIFY_WARNING);
+                break;
+        }
+    }
+
+    function askForUserNotifications() {
+        let xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', AJAXCallback);
+        xhr.open('GET', window.API_BASE_LINK+'/site/check-notifications');
+        xhr.send();
     }
 
     /**
      * Инициализация модуля с запуском интервального таймера для опроса сервера, на основе обьекта параметров
      * перед вызовом в настройки добавить адрес сервера и user_id (или null, если пользователь не авторизован)
+     * requestInterval означает интервал опроса сервера об уведомлениях, в секундах
      *
-     * @param parameters object
+     * @param requestInterval integer
      */
-    function init(parameters) {
-        //если пользователь залогинен и получили его ID, то запускаем интервальную функцию
+    function init(requestInterval) {
+        // если пользователь залогинен и получили его ID,  то запускаем интервальную функцию опроса сервера, после получения предварительных настроек
+        if(window.CLIENT_ID) {
+            setInterval(askForUserNotifications, requestInterval * 1000);
+        } else if(window.CLIENT_ID === undefined) {
+            console.error('Не удалось инициализировать таймер запросов к серверу для опроса');
+        }
     }
 
     return {
