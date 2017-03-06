@@ -22,6 +22,10 @@ let messagingController = (function () {
 
     const msgContainer = document.querySelector('.messages-common-container');
 
+    function getQueryLink(additionalSublink) {
+        return window.API_BASE_LINK + '/discussions/' + additionalSublink;
+    }
+
     /**
      * Удаляет класс из элемента, если он был присвоен ему
      *
@@ -35,6 +39,8 @@ let messagingController = (function () {
     }
 
     /**
+     * В зависимости от второго аргумента устанавливает либо сбрасывает стиль счетчика
+     * голосов в определенном элементе в сообщении (элемент указываем в первом аргументе)
      *
      * @param voteCounterElement Object
      * @param changed boolean
@@ -107,7 +113,7 @@ let messagingController = (function () {
             default: console.error('Некорректный параметр оценки: '+direction+'. Допустимы лишь варианты up и down');
         }
 
-        $.get(window.API_BASE_LINK+"update-voting",requestObj)
+        $.get(getQueryLink("update-voting"),requestObj)
             .done((respond)=>{
                 switch (respond.result) {
                     case 'ok':
@@ -206,7 +212,7 @@ let messagingController = (function () {
      * @param rootNodeId integer
      */
     function expandBranch(rootNodeId) {
-        $.get(window.API_BASE_LINK+"ajax-load-branch",{id:rootNodeId})
+        $.get(getQueryLink("ajax-load-branch"),{id:rootNodeId})
             .done(
                 (tree)=>{
                     console.log(tree);
@@ -246,7 +252,7 @@ let messagingController = (function () {
     }
 
     function deleteMessage(msg_id) {
-        $.get(window.API_BASE_LINK+'delete-message',{id : msg_id})
+        $.get(getQueryLink('delete-message'),{id : msg_id})
             .done((respond)=>{
                 if(respond.result === 'ok') {
                     document.querySelector('#message-'+msg_id).remove();
@@ -270,7 +276,7 @@ let messagingController = (function () {
      * @param content
      */
     function updateMessage(msg_id,content) {
-        $.get(window.API_BASE_LINK+"update-message",{id: msg_id, content:content})
+        $.get(getQueryLink("update-message"),{id: msg_id, content:content})
             .done((respond)=>{
                 if(respond.result === 'ok') {
                     let targetMsgContainer = document.querySelector(`#message-${msg_id} .message-text`);
@@ -296,7 +302,7 @@ let messagingController = (function () {
      * @param content
      */
     function sendMessage(respond_to,content) {
-        $.get(window.API_BASE_LINK+"create-message",{respond_to:respond_to, content:content})
+        $.get(getQueryLink("create-message"),{respond_to:respond_to, content:content})
             .done((respond)=>{
                 if(respond.result === 'ok') {
                     let msgElement = renderElement({

@@ -43,24 +43,19 @@ if($clientModel) { ?>
 ?>
 
 <?php
-$id = ($clientModel) ? $clientModel->id : 'null';
-$login = ($clientModel) ? $clientModel->username : 'null';
 $script = <<< JS
-window.API_BASE_LINK = "$apiBaseUrl";
-window.CLIENT_ID = $id;
-window.CLIENT_LOGIN = '$login';
 window.ROOT_MSG_ID = $rootMsgModel->msg_id;
-window.CLIENT_ROLE = $rootMsgModel->user_role;
-function firstLoad(attempt) {
+
+function firstDiscussionLoad(attempt) {
     if(typeof messagingController.expandBranch === 'function') {
      messagingController.expandBranch(window.ROOT_MSG_ID);
     } else if(attempt <= 4) {
             console.log("Attempt №"+attempt+" to load first message by function 'expandBranch' failed (беда, сэр, основной скрипт для переписки не успел загрузиться "+attempt+"й раз!).")
-            setTimeout(function(){firstLoad(attempt+1)},100); 
+            setTimeout(function(){firstDiscussionLoad(attempt+1)},100); 
         }
 }
 
-firstLoad(1);
+firstDiscussionLoad(1);
 JS;
 $this->registerJs($script);
 ?>

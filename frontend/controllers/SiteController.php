@@ -90,15 +90,6 @@ class SiteController extends Controller
                 'model' => $userToSignUpForm
             ]);
         }
-        /*
-        $user = new User();
-        $user->username = 'admin';
-        $user->setPassword('admin');
-        $user->generateAuthKey();
-        $user->save();
-        */
-
-
     }
 
 }

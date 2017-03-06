@@ -9,7 +9,6 @@ use common\models\User;
 use DateTime;
 use Yii;
 use common\models\ForumMessages;
-use yii\helpers\Url;
 use yii\web\Response;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -44,6 +43,7 @@ class DiscussionsController extends Controller
         }
         //проверка наличия запраиваемой темы форума (корневого сообщения):
         $rootMsgModel = ForumMessages::findOne(['root_theme_id' => $id]);
+
         if(!$rootMsgModel) {
             return $this->render('error',[
                 'name' => 'Страница не найдена',
@@ -63,10 +63,8 @@ class DiscussionsController extends Controller
             }
 
         $clientModel = User::findOne(Yii::$app->user->id);
-        $apiBaseUrl = Url::home(true).'/discussions/';
 
         return $this->render('index', [
-            'apiBaseUrl' => $apiBaseUrl,
             'rootMsgId' => $rootMsgModel->id,
             'discussionTitle' => ForumRoots::findOne($id)->title,
             'discussionInitiatorUsername' => $theme_author->username,

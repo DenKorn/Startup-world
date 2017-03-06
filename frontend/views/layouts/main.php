@@ -3,11 +3,13 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use common\models\User;
 use frontend\assets\MaterialAsset;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use common\widgets\Alert;
+use yii\helpers\Url;
 
 $siteBundle = MaterialAsset::register($this);
 ?>
@@ -76,6 +78,30 @@ $siteBundle = MaterialAsset::register($this);
         <p class="text-center">&copy; Startup World <?= date('Y') ?></p>
     </div>
 </footer>
+
+<?php
+$apiBaseUrl = Url::home(true);
+$clientModel = User::findOne(Yii::$app->user->id);
+
+$id = 'null';
+$login = 'null';
+$role = 'null';
+
+if($clientModel) {
+    $id = $clientModel->id;
+    $login = $clientModel->username;
+    $role = $clientModel->role;
+}
+
+$script = <<< JS
+window.API_BASE_LINK = "$apiBaseUrl";
+window.CLIENT_ID = $id;
+window.CLIENT_LOGIN = '$login';
+window.CLIENT_ROLE = '$role';
+JS;
+
+$this->registerJs($script,$this::POS_HEAD);
+?>
 
 <?php $this->endBody() ?>
 </body>
