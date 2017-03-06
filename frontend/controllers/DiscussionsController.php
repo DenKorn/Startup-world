@@ -144,7 +144,6 @@ class DiscussionsController extends Controller
      */
     public function actionUpdateMessage($id, $content)
     {
-        //todo сделать поправку на текущий часовой пояс при сравнении (в базу пишется время по Гринвичу)
         //todo разрешить только через post
         //todo добавить цензурирование
         //todo позже добавить проверку, не находится ли залогиненный пользователь в бан-листе

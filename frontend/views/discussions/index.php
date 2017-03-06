@@ -12,11 +12,10 @@ if($clientModel) { ?>
 <a onclick="messagingController.prepareModal(<?= $rootMsgModel->msg_id ?>)" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>
 <?php } ?>
 <?php
-//todo добавить подключение кнопки редактирования
+//todo добавить подключение кнопки редактирования и удаления
 ?>
 
 <div class="messages-common-container"></div>
-<div class="forum-alerts"></div>
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">

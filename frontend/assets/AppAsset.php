@@ -20,6 +20,7 @@ class AppAsset extends AssetBundle
     public $js = [
         'js/material.js',
         'js/ripples.js',
+        'js/user-notifications.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',

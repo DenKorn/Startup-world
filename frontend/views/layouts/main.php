@@ -69,6 +69,8 @@ $siteBundle = MaterialAsset::register($this);
     </div>
 </div>
 
+<div class="forum-alerts"></div>
+
 <footer class="footer">
     <div class="container">
         <p class="text-center">&copy; Startup World <?= date('Y') ?></p>

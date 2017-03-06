@@ -140,3 +140,17 @@ a.desc:after {
     line-height: 2em !important;
     text-transform: none !important;
 }
+
+/* Для блока уведомлений */
+
+.forum-alerts {
+    position: fixed;
+    float: right;
+    height: 100%;
+    width: 20%;
+    right: 0;
+    top: 70px;
+    max-height: 100%;
+    padding-right: 5px;
+    padding-top: 5px;
+}

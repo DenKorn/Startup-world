@@ -1,16 +1,13 @@
 "use strict";
 
+/**
+ * Created by Денис on 23.12.2016.
+ * Заранее прошу не пугаться кода. Да, здесь стоило и можно было применить ООП с паттернами "Фабрика", "Команда", "Заместитель" и прочие прелести.
+ * Но в силу сжатых сроков архитектуру нормальную для фронтенда спланировать не вышло
+ */
 let messagingController = (function () {
-    /**
-     * Created by Денис on 23.12.2016.
-     * Заранее прошу не пугаться кода. Да, здесь стоило и можно было применить ООП с паттернами "Фабрика", "Команда", "Заместитель" и прочие прелести.
-     * Но в силу сжатых сроков архитектуру нормальную для фронтенда спланировать не вышло
-     */
 
-//для присваивания id к каждому создаваемому обьекту уведомления
-   let lastUsedNotifyId = 0;
-
-//for messages interacting
+    //for messages interacting
     let lastInteractedMessageId = 0;
     let currentAction = 0; // 0 - send, 1 - edit (2 - delete - возможен только тогда же, когда возможен и edit)
 
@@ -114,7 +111,7 @@ let messagingController = (function () {
             .done((respond)=>{
                 switch (respond.result) {
                     case 'ok':
-                        notify(respond.message, NOTIFY_INFO);
+                        userNotifications.notify(respond.message, NOTIFY_INFO);
                         setupVotingContainer(
                             document.querySelector(`#message-${id} .voting`),
                             respond.newVote ? +respond.newVote : 0,
@@ -122,7 +119,7 @@ let messagingController = (function () {
                         );
                         break;
                     case 'error':
-                        notify(respond.message, NOTIFY_WARNING);
+                        userNotifications.notify(respond.message, NOTIFY_WARNING);
                         if(respond.data) {
                             console.error(respond.data);
                         }
@@ -132,7 +129,7 @@ let messagingController = (function () {
                 }
             })
             .fail((error)=>{console.log("message updating error: ",error);
-                notify("Не удалось изменить рейтинг сообщения",NOTIFY_WARNING)});
+                userNotifications.notify("Не удалось изменить рейтинг сообщения",NOTIFY_WARNING)});
     }
 
 
@@ -201,9 +198,13 @@ let messagingController = (function () {
         });
     }
 
-// функция подгрузки через AJAX части переписки
-//инициируем подгрузку фрагмента JSON
-// По завершению выдаем либо уведомление об ошибке, либо сериализуем JSON и рендерим
+    /**
+     * функция подгрузки через AJAX части переписки:
+     * инициируем подгрузку фрагмента JSON
+     * по завершению выдаем либо уведомление об ошибке, либо сериализуем JSON и рендерим
+     *
+     * @param rootNodeId integer
+     */
     function expandBranch(rootNodeId) {
         $.get(window.API_BASE_LINK+"ajax-load-branch",{id:rootNodeId})
             .done(
@@ -212,12 +213,12 @@ let messagingController = (function () {
                     renderMsgTree(tree, (rootNodeId === window.ROOT_MSG_ID) ? undefined : document.querySelector(`#message-${rootNodeId}`));
                     let expBtnElem = document.querySelector(`#message-${rootNodeId} .message-expand-btn`);
                     if(expBtnElem) expBtnElem.remove();
-                    notify('Фрагмент ветки от '+tree.user_login+' загружен',NOTIFY_INFO);
+                    userNotifications.notify('Фрагмент ветки от '+tree.user_login+' загружен',NOTIFY_INFO);
                 })
             .fail(
                 (error)=>{
                     console.log(error);
-                    notify('Не удалось загрузить фрагмент',NOTIFY_WARNING);
+                    userNotifications.notify('Не удалось загрузить фрагмент',NOTIFY_WARNING);
                 });
     }
 
@@ -249,14 +250,14 @@ let messagingController = (function () {
             .done((respond)=>{
                 if(respond.result === 'ok') {
                     document.querySelector('#message-'+msg_id).remove();
-                    notify(`Сообщение с подчиненной ему веткой удалено.`,NOTIFY_INFO);
+                    userNotifications.notify(`Сообщение с подчиненной ему веткой удалено.`,NOTIFY_INFO);
                 } else if(respond.result == 'error') {
-                    notify(respond.message,NOTIFY_WARNING);
+                    userNotifications.notify(respond.message,NOTIFY_WARNING);
                 }
             })
             .fail((error)=>{
                 console.log('Deleting error',error);
-                notify('Не удалось удалить сообщение.',NOTIFY_WARNING);
+                userNotifications.notify('Не удалось удалить сообщение.',NOTIFY_WARNING);
             });
     }
 
@@ -275,16 +276,16 @@ let messagingController = (function () {
                     let targetMsgContainer = document.querySelector(`#message-${msg_id} .message-text`);
                     if(targetMsgContainer) {
                         targetMsgContainer.innerHTML = respond.new_content;
-                        notify(`Сообщение отправлено.`);
+                        userNotifications.notify(`Сообщение отправлено.`);
                     } else {
-                        notify('Ошибка выполнения: не найден элемент для обновления (настучите админу по голове, чтобы передавал в ответе на запрос, на всякий случай, целый обьект обновленного сообщения).',NOTIFY_WARNING);
+                        userNotifications.notify('Ошибка выполнения: не найден элемент для обновления (настучите админу по голове, чтобы передавал в ответе на запрос, на всякий случай, целый обьект обновленного сообщения).',NOTIFY_WARNING);
                     }
                 } else if(respond.result = 'error') {
-                    notify(respond.message,NOTIFY_WARNING);
+                    userNotifications.notify(respond.message,NOTIFY_WARNING);
                 }
             })
             .fail((error)=>{console.log("message updating error: ",error);
-                notify("Не удалось обновить сообщение",NOTIFY_WARNING)});
+                userNotifications.notify("Не удалось обновить сообщение",NOTIFY_WARNING)});
     }
 
     /**
@@ -314,14 +315,14 @@ let messagingController = (function () {
                     let targetContainer = document.querySelector('#message-'+respond_to);
                     targetContainer = targetContainer ? targetContainer : msgContainer;
                     targetContainer.appendChild(msgElement);
-                    notify(`Сообщение отправлено.`)
+                    userNotifications.notify(`Сообщение отправлено.`)
                 } else if(respond.result = 'error') {
-                    notify(respond.message,NOTIFY_WARNING);
+                    userNotifications.notify(respond.message,NOTIFY_WARNING);
                 }
             })
             .fail((error)=>{
                 console.log("message sending error: ",error);
-                notify("Не удалось отправить сообщение",NOTIFY_WARNING)
+                userNotifications.notify("Не удалось отправить сообщение",NOTIFY_WARNING)
             });
 
 
@@ -332,8 +333,14 @@ let messagingController = (function () {
      * id сообщения для взаимодействия и действие берет из глобальных переменных
      */
     function sendModal() {
-        let errorLength = (action) => {notify(`Не удалось ${action} сообщение: превышена допустимая длина.`,NOTIFY_WARNING)};
-        let errorLengthSmall = (action) => {notify(`Cообщение не ${action}: сообщение пусто.`,NOTIFY_WARNING)};
+        let errorLength = (action) => {
+            userNotifications.notify(`Не удалось ${action} сообщение: превышена допустимая длина.`,NOTIFY_WARNING)
+        };
+
+        let errorLengthSmall = (action) => {
+            userNotifications.notify(`Cообщение не ${action}: сообщение пусто.`,NOTIFY_WARNING)
+        };
+
         const MAX_MSG_LENGTH = 1500;
         const MIN_MSG_LENGTH = 1;
         let inputValue = document.querySelector('#respond-message').value;
@@ -352,7 +359,7 @@ let messagingController = (function () {
                         if(document.querySelector(`#message-${lastInteractedMessageId} .message-text`).innerHTML != inputValue) {
                             updateMessage(lastInteractedMessageId,inputValue);
                         } else {
-                            notify('Вы не изменили сообщение.',NOTIFY_INFO);
+                            userNotifications.notify('Вы не изменили сообщение.',NOTIFY_INFO);
                         }
                     } else errorLengthSmall('обновлено');
                 } else errorLength('обновить');
@@ -364,23 +371,6 @@ let messagingController = (function () {
         setTimeout(function(){
             document.querySelector('#respond-message').value=''
         },500);
-    }
-
-//функция добавления уведомления
-    function notify(message, type = 0) { //0 - info, 1 - warning
-        let id = lastUsedNotifyId++;
-        document.querySelector('.forum-alerts').innerHTML +=
-            `<div class="alert ${type == 0 ? 'alert-info' : 'alert-warning'} alert-dismissable fade">
-             <a href="#" id="notify-close-btn-${id}" class="close" data-dismiss="alert" aria-label="close">×</a>
-             <strong>${type == 0 ? 'Info' : 'Warning'}:</strong> ${message}
-            </div>`;
-        setTimeout(()=>{document.querySelector('#notify-close-btn-' + id).parentNode.classList.add('in')},100);
-        setTimeout(()=>{document.querySelector('#notify-close-btn-' + id).click()},5000);
-        switch (type) {
-            case 0: console.info(message); break;
-            case 1: console.warn(message); break;
-            default: console.log(message); break;
-        }
     }
 
     function init() {
