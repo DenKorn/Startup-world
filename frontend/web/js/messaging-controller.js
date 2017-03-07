@@ -150,7 +150,7 @@ let messagingController = (function () {
 
         //дообавление кнопки "раскрыть ветку"
         let open_branch = (element.subjected.length === 0 && element.subjected_count > 0) ?
-            `<a onclick="messagingController.expandBranch(${element.msg_id})" class="btn btn-default message-expand-btn btn-xs">Открыть <span class="badge">${element.subjected_count}</span></a>`
+            `<a onclick="messagingController.expandBranch(${element.msg_id})" class="btn btn-default message-expand-btn btn-xs">Развернуть <span class="badge">${element.subjected_count}</span></a>`
             : '';
 
         //добавление кнопки "редактировать"
@@ -233,14 +233,18 @@ let messagingController = (function () {
      * @param usedMessageId
      * @param action
      */
-    function prepareModal(usedMessageId, action = MODAL_ACTION_SEND) {
+    function prepareModal(usedMessageId, action = MODAL_ACTION_SEND, author_login = null) {
         lastInteractedMessageId = usedMessageId;
         currentAction = action;
         switch (action) {
             case MODAL_ACTION_SEND : {
-                let userNameBlock = document.querySelector(`#message-${usedMessageId} .message-user`);
-                let username = userNameBlock ? userNameBlock.innerHTML : '@not_found';
-                document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + username;
+                if(author_login) {
+                    document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + author_login;
+                } else {
+                    let userNameBlock = document.querySelector(`#message-${usedMessageId} .message-user`);
+                    let username = userNameBlock ? userNameBlock.innerHTML : '@not_found';
+                    document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + username;
+                }
                 break;
             }
             case MODAL_ACTION_UPDATE : {

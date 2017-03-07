@@ -57,6 +57,21 @@ class ForumMessages extends \yii\db\ActiveRecord
     }
 
     /**
+     * Получает id темы сообщения, в которой оно оставлено
+     * Реализовано дико костыльно, лишь бы работало
+     *
+     * @param $msg_id int
+     */
+    public static function getTopParent($msg_id)
+    {
+        $messageRecord = self::findOne(['id' => $msg_id]);
+        while ($messageRecord->parent_message_id) {
+            $messageRecord = self::findOne(['id' => $messageRecord->parent_message_id]);
+        }
+        return $messageRecord->root_theme_id;
+    }
+
+    /**
      * Функция рекурсивно строит обьект сообщений для его отправки в загружаемую переписку
      *
      * @param $nodeModel ForumMessages

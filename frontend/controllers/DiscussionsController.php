@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ForumNotifications;
 use common\models\ForumRoots;
 use common\models\ForumVotes;
 use common\models\GeneralSettings;
@@ -9,6 +10,7 @@ use common\models\User;
 use DateTime;
 use Yii;
 use common\models\ForumMessages;
+use yii\helpers\Url;
 use yii\web\Response;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -28,6 +30,23 @@ class DiscussionsController extends Controller
                 ],
             ],
         ];
+    }
+
+    /**
+     * Осуществляет поиск темы, в которой находится сообщение с нужным id.
+     * В случае успешного поиска перенаправляет на эту тему, иначе перенаправляет на домашнюю страницу
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function actionSearchForMessage($id = -1)
+    {
+        if($id == -1) return $this->goHome();
+
+        $themeId = ForumMessages::getTopParent($id);
+        if(!$themeId) return $this->goHome();
+
+        return $this->redirect(Url::home(true).'/discussions?id='.$themeId);
     }
 
     /**
@@ -99,7 +118,6 @@ class DiscussionsController extends Controller
      */
      public function actionCreateMessage($respond_to, $content)
     {
-        //todo выполнять только по post
         //todo позже добавить проверку, не находится ли залогиненный пользователь в бан-листе
         //todo добавить контроль цензуры перед сохранением
 
@@ -110,8 +128,9 @@ class DiscussionsController extends Controller
         //проверка того, что пользователь залогинен:
         if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: ваш аккаунт заблокирован или не существует.'];
 
+        $messageToRespond = ForumMessages::findOne($respond_to);
         //проверка существования сообщения, на которое пытаемся написать ответ:
-        if(!ForumMessages::findOne($respond_to)) return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для ответа не найдено.'];
+        if(!$messageToRespond) return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для ответа не найдено.'];
 
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
 
@@ -124,12 +143,24 @@ class DiscussionsController extends Controller
         $newMsg = new ForumMessages(['content' => $content, 'parent_message_id' => $respond_to, 'user_id' => Yii::$app->user->id]);
         if (!$newMsg->save()) return ['result' => 'error', 'code' => 3, 'message' => 'Не удалось сохранить сообщение в базу данных.'];
 
+        //перед возвратом результата об успешной отправке также нужно добавить в список уведомлений уведомление автору подветки
+        $methodLink = Url::home(true).'/discussions/search-for-message?id='.$respond_to;
+        $login = User::findOne(Yii::$app->user->id)->username;
+        $cuttedRespond = mb_strimwidth($content, 0, 100, '...');
+        ForumNotifications::createNotification($messageToRespond->user_id,"@$login ответил вам:<br>$cuttedRespond<br><a href='$methodLink'>ЧИТАТЬ</a>",'alert',$respond_to);
+
         return [
             'result' => 'ok',
             'new_msg_id' => $newMsg->id,
             'created_at' => $newMsg->created_at,
             'msg_content' => $newMsg->content
         ];
+    }
+
+    public function actionTest()
+    {
+        ForumNotifications::createNotification(1,
+            'Вы здесь не в почете, рейтинг -5:'."", 'alert',1);
     }
 
     /**

@@ -1,8 +1,11 @@
 <?php
 namespace frontend\controllers;
 
+use common\models\ForumNotifications;
+use common\models\GeneralSettings;
 use common\models\LoginForm;
 use common\models\SignUpForm;
+use common\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -60,16 +63,21 @@ class SiteController extends Controller
 
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Не трогай API, ты не должен был видеть это сообщение. Скрипт не мог отправить этот запрос.'];
 
-        //Yii::$app->user->last_activity;
+        $current_user = User::findOne(Yii::$app->user->id);
 
-        //todo создать таблицу списка уведомлений
-        //todo создать для неё модель
-        //todo Добавить в модель методы для получения ошибок и простых уведомлений
-        //todo если есть чё вывести - выводим с результатом "ок", иначе выдаем пустой ответ с результатом 'null'
+        //обновляем время последнего захода пользователя на сайт
+        $current_user->actualizeOnlineStatus();
 
-        return ['result' => 'ok', 'alerts' => ['Тебя лайкнули, аутист <a href="http://photo.qip.ru/photo/wp2/115887636/xlarge/141981340.jpg">Узнать, кто</a>']];
+        $NOTIFICATIONS_SETTINGS = GeneralSettings::getSettingsObjByName('USER_NOTIFICATIONS');
 
-        return ['result' => null];
+        $alerts = ForumNotifications::getNotificationsForUser(Yii::$app->user->id, $NOTIFICATIONS_SETTINGS->min_notify_age_for_mailing_in_hours, 'alert', true);
+        $warnings = ForumNotifications::getNotificationsForUser(Yii::$app->user->id, $NOTIFICATIONS_SETTINGS->min_notify_age_for_mailing_in_hours, 'warning', true);
+
+        return [
+            'result' => 'ok',
+            'alerts' => $alerts,
+            'warnings' => $warnings
+            ];
     }
 
     public function actionIndex()

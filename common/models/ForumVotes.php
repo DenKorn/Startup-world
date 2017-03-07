@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\Query;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "forum_votes".
@@ -13,7 +14,6 @@ use yii\db\Query;
  * @property string $msg_id
  * @property string $value
  * @property string $setting_date
- *
  * @property ForumMessages $msg
  * @property User $user
  */
@@ -43,6 +43,7 @@ class ForumVotes extends \yii\db\ActiveRecord
 
     /**
      * Считает рейтинг конкретного сообщения
+     * Также записывает в поле сообщения last_calculated_rating посчитанное значение рейтинга, кешируя его
      *
      * @param $msg_id int
      * @return int
@@ -50,7 +51,38 @@ class ForumVotes extends \yii\db\ActiveRecord
     public static function getMessageSummaryRating($msg_id)
     {
         $querySumRes = (new Query())->select(['sum(value) as rating'])->from(self::tableName())->where(['msg_id' => $msg_id])->one()['rating'];
-        return $querySumRes ? $querySumRes : 0;
+        $ratingValue = $querySumRes ? $querySumRes : 0;
+
+        $targetMessage = ForumMessages::findOne(['id' => $msg_id]);
+        if($targetMessage->last_calculated_rating != $ratingValue) {
+            $targetMessage->last_calculated_rating = $ratingValue;
+            $targetMessage->save();
+
+            if(6 >= $ratingValue && $ratingValue >= -6) {
+                $methodLink = Url::home(true).'/discussions/search-for-message?id='.$msg_id;
+                $msgLink = "<br><a href='$methodLink'>ПЕРЕЙТИ</a>";
+                switch ($ratingValue) {
+                    case 6:
+                        ForumNotifications::createNotification($targetMessage->user_id,
+                            'Рейтинг сообщения +6! Вас почитает даже админ!'.$msgLink, 'alert',$msg_id);
+                        break;
+                    case 3:
+                        ForumNotifications::createNotification($targetMessage->user_id,
+                            'Так держать, +3 рейтинга на вашем сообщении'.$msgLink, 'alert',$msg_id);
+                        break;
+                    case -3:
+                        ForumNotifications::createNotification($targetMessage->user_id,
+                            'Вы здесь не в почете, рейтинг -3:'.$msgLink, 'alert',$msg_id);
+                        break;
+                    case -6:
+                        ForumNotifications::createNotification($targetMessage->user_id,
+                            'Лучше выходи скорей, пока не забанили (рейтинг -6)'.$msgLink, 'warning',$msg_id);
+                        break;
+                }
+            }
+        }
+
+        return $ratingValue;
     }
 
     /**
