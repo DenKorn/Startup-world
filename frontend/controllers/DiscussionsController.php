@@ -157,12 +157,6 @@ class DiscussionsController extends Controller
         ];
     }
 
-    public function actionTest()
-    {
-        ForumNotifications::createNotification(1,
-            'Вы здесь не в почете, рейтинг -5:'."", 'alert',1);
-    }
-
     /**
      * Обновление сообщения пользователя
      * Происходит лишь при условии, что это личное сообщение пользователя и оно не слишком давно оставлено, либо если доступ

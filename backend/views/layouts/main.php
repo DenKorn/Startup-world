@@ -28,27 +28,27 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'Admin panel',
+        'brandLabel' => 'Панель '.'администратора', //todo в зависимости от роли пользователя выводить "администратора" или "модератора"
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Main', 'url' => ['/site/index']],
-        ['label' => 'Projects', 'url' => ['/projects/index']],
-        ['label' => 'Contacts', 'url' => ['/contacts/index']],
-        ['label' => 'Achievements', 'url' => ['/achievements/index']],
-        ['label' => 'Content', 'url' => ['/common/index']],
-        ['label' => 'Activity', 'url' => ['/activity/index']],
+    $menuItems = [ //todo сделать вывод ссылок в зависимости от роли пользователя (незалогиненым не показывать никаких вкладок вообще)
+        ['label' => 'Памятка администратора', 'url' => ['/site/index']], //todo добавить изменение надписи на модератора
+        ['label' => 'Пользователи', 'url' => ['/projects/index']],
+        ['label' => 'Бан-лист', 'url' => ['/contacts/index']],
+        ['label' => 'Активность', 'url' => ['/achievements/index']],
+        ['label' => 'Рассылка', 'url' => ['/common/index']],
+        ['label' => 'Настройки', 'url' => ['/activity/index']],
     ];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
+                'Выйти (' . Yii::$app->user->identity->username . ')',
                 ['class' => 'btn btn-link logout']
             )
             . Html::endForm()
@@ -72,7 +72,7 @@ AppAsset::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="text-center">&copy; Denys Korniichuk <?= date('Y') ?></p>
+        <p class="text-center">&copy; Startup World <?= date('Y') ?></p>
     </div>
 </footer>
 
