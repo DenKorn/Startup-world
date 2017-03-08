@@ -45,7 +45,7 @@ $siteBundle = MaterialAsset::register($this);
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
         $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
-        $menuItems[] = ['label' => 'Профиль', 'url' => ['/contacts/index']];
+        $menuItems[] = ['label' => 'Профиль', 'url' => ['/profile']];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(

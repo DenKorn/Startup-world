@@ -3,9 +3,11 @@
 namespace common\models;
 
 use DateTime;
+use DateTimeZone;
 use stdClass;
 use Yii;
 use yii\base\Object;
+use yii\db\Query;
 
 /**
  * This is the model class for table "forum_messages".
@@ -15,6 +17,7 @@ use yii\base\Object;
  * @property string $created_at
  * @property integer $user_id
  * @property integer $root_theme_id
+ * @property integer $last_calculated_rating
  * @property string $content
  */
 class ForumMessages extends \yii\db\ActiveRecord
@@ -56,11 +59,43 @@ class ForumMessages extends \yii\db\ActiveRecord
         ];
     }
 
+
+    /**
+     * Выдаёт количество тем, созданных конкретным пользователем.
+     *
+     * @param $user_id
+     * @return array
+     */
+    public static function getCreatedRootsByUserCount($user_id)
+    {
+        return (new Query())->select('count(*) as created_roost_count')
+            ->from(self::tableName())
+            ->where(['user_id' => $user_id])
+            ->andWhere(['not',['root_theme_id' => null]])
+            ->one()['created_roost_count'];
+    }
+
+    /**
+     * Функция выдает общее количество сообщений, написанных некоторым пользователем, а также их суммарный рейтинг.
+     * Поиск двух значений в одной функции сопряжен с необходимостью оптимизировать вывод статистики.
+     *
+     * @param $user_id int
+     * @return array
+     */
+    public static function getUserMsgCountAndRating($user_id)
+    {
+        return (new Query())->select("COUNT(*) as msg_summary_count, SUM(last_calculated_rating) as msg_summary_rating")
+            ->from(self::tableName())
+            ->where(['user_id' => $user_id])
+            ->one();
+    }
+
     /**
      * Получает id темы сообщения, в которой оно оставлено
      * Реализовано дико костыльно, лишь бы работало
      *
      * @param $msg_id int
+     * @return int
      */
     public static function getTopParent($msg_id)
     {
@@ -97,7 +132,9 @@ class ForumMessages extends \yii\db\ActiveRecord
 
 
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
-        $time_now = new DateTime();
+        $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
+        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));
+
         $time_created_at = new DateTime($attribs['created_at']);
         $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600;
         //todo добавить учитывание полномочий для модератора

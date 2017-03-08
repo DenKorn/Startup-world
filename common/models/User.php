@@ -1,6 +1,8 @@
 <?php
 namespace common\models;
 
+use DateTime;
+use DateTimeZone;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -15,6 +17,7 @@ use yii\web\IdentityInterface;
  * @property integer $id
  * @property string $username
  * @property string $role
+ * @property string $last_activity
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $auth_key
@@ -26,19 +29,26 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
-    /*public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::className(),
-                'value' => new Expression('NOW()')
-            ],
-        ];
-    }*/
-
     public function actualizeOnlineStatus()
     {
-        $this->last_activity = new Expression('CURRENT_TIMESTAMP');
+        $this->last_activity = new Expression('NOW()');
+        $this->save();
+    }
+
+    /**
+     * Проверяет, находится ли пользователь на форуме в данный момент.
+     * Использует: время последней активности пользователя, текущее время, настройки уведомлений (допустимое время для статуса "онлайн" +  разброс)
+     */
+    public function isOnline()
+    {
+        $notificationSettings = GeneralSettings::getSettingsObjByName('USER_NOTIFICATIONS');
+        $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
+        $maxOnlinePeriod = $notificationSettings->online_interval_in_seconds + $notificationSettings->online_interval_dispersion/2;
+
+        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));
+        $lastActivity = new DateTime($this->last_activity);
+        $interval = ($time_now->getTimestamp() - $lastActivity->getTimestamp()); //абсолютная разность времени в секундах
+        return $interval < $maxOnlinePeriod+1000;
     }
 
     public function registrate()

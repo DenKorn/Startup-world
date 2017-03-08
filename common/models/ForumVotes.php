@@ -42,6 +42,21 @@ class ForumVotes extends \yii\db\ActiveRecord
     }
 
     /**
+     * Функция выдает общее количество оценок, оставленных некоторым пользователем, а также их сумму.
+     * Поиск двух значений в одной функции сопряжен с необходимостью оптимизировать вывод статистики.
+     *
+     * @param $user_id int
+     * @return array
+     */
+    public static function getUserMsgCountAndRating($user_id)
+    {
+        return (new Query())->select("COUNT(*) as votes_count, SUM(value) as votes_summary_rate")
+            ->from(self::tableName())
+            ->where(['user_id' => $user_id])
+            ->one();
+    }
+
+    /**
      * Считает рейтинг конкретного сообщения
      * Также записывает в поле сообщения last_calculated_rating посчитанное значение рейтинга, кешируя его
      *
@@ -50,7 +65,11 @@ class ForumVotes extends \yii\db\ActiveRecord
      */
     public static function getMessageSummaryRating($msg_id)
     {
-        $querySumRes = (new Query())->select(['sum(value) as rating'])->from(self::tableName())->where(['msg_id' => $msg_id])->one()['rating'];
+        $querySumRes = (new Query())->select(['sum(value) as rating'])
+            ->from(self::tableName())
+            ->where(['msg_id' => $msg_id])
+            ->one()['rating'];
+
         $ratingValue = $querySumRes ? $querySumRes : 0;
 
         $targetMessage = ForumMessages::findOne(['id' => $msg_id]);
@@ -58,9 +77,12 @@ class ForumVotes extends \yii\db\ActiveRecord
             $targetMessage->last_calculated_rating = $ratingValue;
             $targetMessage->save();
 
+            // Ниже приведен огромный костыль, для демонстрации уведомлений пользователю при достижении определенного рейтинга
+            // его сообщения. Конечно, вместо него стоит делать отдельную таблицу и вообще выносить эту логику в отдельный метод,
+            // но это далеко не приоритетная цель при создании данного форума
             if(6 >= $ratingValue && $ratingValue >= -6) {
                 $methodLink = Url::home(true).'/discussions/search-for-message?id='.$msg_id;
-                $msgLink = "<br><a href='$methodLink'>ПЕРЕЙТИ</a>";
+                $msgLink = "<br><a href='$methodLink'>перейти</a>";
                 switch ($ratingValue) {
                     case 6:
                         ForumNotifications::createNotification($targetMessage->user_id,
@@ -95,7 +117,11 @@ class ForumVotes extends \yii\db\ActiveRecord
     public static function getAuthorizedUserChoiseForMessage($msg_id)
     {
         if(!Yii::$app->user->isGuest) {
-            $queryRes = (new Query())->select('value')->from(self::tableName())->where(['user_id' => Yii::$app->user->id, 'msg_id' => $msg_id])->one()['value'];
+            $queryRes = (new Query())->select('value')
+                ->from(self::tableName())
+                ->where(['user_id' => Yii::$app->user->id, 'msg_id' => $msg_id])
+                ->one()['value'];
+
             return $queryRes ? $queryRes : 0;
         } else
             return null;

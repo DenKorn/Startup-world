@@ -8,6 +8,7 @@ use common\models\ForumVotes;
 use common\models\GeneralSettings;
 use common\models\User;
 use DateTime;
+use DateTimeZone;
 use Yii;
 use common\models\ForumMessages;
 use yii\helpers\Url;
@@ -147,7 +148,7 @@ class DiscussionsController extends Controller
         $methodLink = Url::home(true).'/discussions/search-for-message?id='.$respond_to;
         $login = User::findOne(Yii::$app->user->id)->username;
         $cuttedRespond = mb_strimwidth($content, 0, 100, '...');
-        ForumNotifications::createNotification($messageToRespond->user_id,"@$login ответил вам:<br>$cuttedRespond<br><a href='$methodLink'>ЧИТАТЬ</a>",'alert',$respond_to);
+        ForumNotifications::createNotification($messageToRespond->user_id,"@$login ответил вам:<br>$cuttedRespond<br><a href='$methodLink'>читать</a>",'alert',$respond_to);
 
         return [
             'result' => 'ok',
@@ -185,9 +186,10 @@ class DiscussionsController extends Controller
         if($targetMessage->user_id != Yii::$app->user->id) return ['result' => 'error', 'code' => 2, 'message' => 'Вы пытаетесь редактировать чужое сообщение.'];
 
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
+        $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
 
         //проверка срока давности сообщения с момента создания
-        $time_now = new DateTime();
+        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));;
         $time_created_at = new DateTime($targetMessage->created_at);
         $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютная разность времени в часах
         if($interval > $MSG_LIMITS->still_editable_during_hours) return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для редактируемого сообщения.'];
@@ -232,7 +234,8 @@ class DiscussionsController extends Controller
         if($targetMessage->user_id != Yii::$app->user->id)
             return ['result' => 'error', 'code' => 7, 'message' => 'Вы пытаетесь удалить чужое сообщение.'];
 
-        $time_now = new DateTime();
+        $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
+        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));
         $time_created_at = new DateTime($targetMessage->created_at);
         $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютное количество времени в часах
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
