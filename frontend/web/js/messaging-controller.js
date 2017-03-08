@@ -238,13 +238,10 @@ let messagingController = (function () {
         currentAction = action;
         switch (action) {
             case MODAL_ACTION_SEND : {
-                if(author_login) {
-                    document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + author_login;
-                } else {
-                    let userNameBlock = document.querySelector(`#message-${usedMessageId} .message-user`);
-                    let username = userNameBlock ? userNameBlock.innerHTML : '@not_found';
-                    document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + username;
-                }
+
+                let userNameBlock = document.querySelector(`#message-${usedMessageId} .message-user`);
+                let username = userNameBlock ? userNameBlock.innerHTML : '@not_found';
+                document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + username;
                 break;
             }
             case MODAL_ACTION_UPDATE : {
