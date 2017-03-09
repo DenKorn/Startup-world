@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ForumBanList;
 use common\models\ForumNotifications;
 use common\models\ForumRoots;
 use common\models\ForumVotes;
@@ -52,7 +53,7 @@ class DiscussionsController extends Controller
 
     /**
      * Отображение страницы с перепиской в теме, рендеринг сообщений происходит на клиенте.
-     * ToDo в случае отсутствия записей о теме форума бросать exception
+     * ToDo в случае отсутствия записей о теме форума вывести нормальную форму с сообщением об этом
      * @param $id int
      * @return mixed
      */
@@ -83,6 +84,16 @@ class DiscussionsController extends Controller
             }
 
         $clientModel = User::findOne(Yii::$app->user->id);
+        $banned = false;
+
+        //проверка, не находится ли залогиненный пользователь в бан-листе
+        if($clientModel) {
+            $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+            if($banRecord) {
+                ForumNotifications::createNotification($clientModel->id, 'Напоминание: вы заблокированы. Причина: '.$banRecord->reason.'.', 'warning');
+                $banned = true;
+            }
+        }
 
         return $this->render('index', [
             'rootMsgId' => $rootMsgModel->id,
@@ -91,6 +102,7 @@ class DiscussionsController extends Controller
             'discussionInitiatorId' => $theme_author->id,
             'rootMsgModel' => $rootMsgModel->getTreeStruct(0),
             'clientModel' => $clientModel,
+            'banned' => $banned,
         ]);
     }
 
@@ -120,7 +132,6 @@ class DiscussionsController extends Controller
      */
      public function actionCreateMessage($respond_to, $content)
     {
-        //todo позже добавить проверку, не находится ли залогиненный пользователь в бан-листе
         //todo добавить контроль цензуры перед сохранением
 
         if(!Yii::$app->request->isAjax) return $this->redirect(['forum/index']);
@@ -129,6 +140,10 @@ class DiscussionsController extends Controller
 
         //проверка того, что пользователь залогинен:
         if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: вы не вошли на сайт!'];
+
+        //проверка, не находится ли залогиненный пользователь в бан-листе
+        $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно отправить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
 
         $messageToRespond = ForumMessages::findOne($respond_to);
         //проверка существования сообщения, на которое пытаемся написать ответ:
@@ -172,15 +187,17 @@ class DiscussionsController extends Controller
      */
     public function actionUpdateMessage($id, $content)
     {
-        //todo разрешить только через post
         //todo добавить цензурирование
-        //todo позже добавить проверку, не находится ли залогиненный пользователь в бан-листе
 
         if(!Yii::$app->request->isAjax) return $this->redirect(['forum/index']);
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         //проверка того, что пользователь залогинен:
-        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: ваш аккаунт заблокирован или не существует.'];
+        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно обновить сообщение: вы не авторизовались на сайте!'];
+
+        //проверка, не находится ли залогиненный пользователь в бан-листе
+        $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно обновить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
 
         //проверка существования сообщения, которое пытаемся обновить:
         $targetMessage = ForumMessages::findOne($id);
@@ -218,20 +235,20 @@ class DiscussionsController extends Controller
      */
     public function actionDeleteMessage($id)
     {
-        // todo добавить в правилах разрешение выполнять эту функцию только через метод post
-        // todo позже добавить проверку, не находится ли залогиненный пользователь в бан-листе
-        // todo проверка наличия пользователя в бан-листе
-
         if(!Yii::$app->request->isAjax) return $this->redirect(['forum/index']);
 
         Yii::$app->response->format = Response::FORMAT_JSON;
         $targetMessage = ForumMessages::findOne($id);
 
+        //проверка, не находится ли залогиненный пользователь в бан-листе
+        $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно удалить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
+
         //проверка существования сообщения, которое пытаемся удалить
         if(!$targetMessage) return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для удаления не найдено.'];
 
         //проверка того, что пользователь аутентифицирован
-        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 2, 'message' => 'Невозможно удалить сообщение: ваш аккаунт или не существует.'];
+        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 2, 'message' => 'Невозможно удалить сообщение: вы не авторизовались на сайте!'];
 
         //проверка принадлежности удаляемого сообщения автору
         //todo поправку на доступ модератора
@@ -268,6 +285,11 @@ class DiscussionsController extends Controller
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
+
+        //проверка, не находится ли залогиненный пользователь в бан-листе
+        $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно голосовать: вы заблокированы! Причина: '.$banRecord->reason.'.'];
+
 
         if(abs($value) > 1 || $value == 0) {
             return ['result' => 'error', 'message' => 'Не играйся с API, шалун.)'];

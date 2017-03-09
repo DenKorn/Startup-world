@@ -42,7 +42,10 @@ class ForumNotifications extends \yii\db\ActiveRecord
 
     public static function createNotification($user_id, $message, $type, $from_message = null)
     {
-        $newRecord = new ForumNotifications(['recipient_id' => $user_id, 'message' => $message, 'type' => $type, 'from_message' => $from_message]);
+        $newRecord = new ForumNotifications(['recipient_id' => $user_id, 'message' => $message, 'type' => $type]);
+        if($from_message) {
+            $newRecord['from_message'] = $from_message;
+        }
         $newRecord->save();
     }
 

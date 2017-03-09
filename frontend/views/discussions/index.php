@@ -1,4 +1,13 @@
 <?php
+
+/**
+ *
+ * @var $discussionTitle string
+ * @var $discussionInitiatorUsername string
+ * @var $discussionInitiatorId integer
+ * @var $rootMsgModel object
+ */
+
 use frontend\assets\DiscussionAsset;
 DiscussionAsset::register($this);
 $this->title = 'Форум - '.$discussionTitle;
@@ -7,10 +16,9 @@ $this->title = 'Форум - '.$discussionTitle;
 <div class="message-created-time"><?= $rootMsgModel->created_at ?></div>
 <h4><strong>Тема:</strong> <?= $discussionTitle ?></h4>
 <p style="margin:0"><strong>Содержание:</strong> <?= $rootMsgModel->content ?></p>
-<?php
-if($clientModel) { ?>
+<?php if($clientModel && !$banned): ?>
 <a onclick="messagingController.prepareModal(<?= $rootMsgModel->msg_id ?>,0,'@<?= $discussionInitiatorUsername ?>')" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>
-<?php } ?>
+<?php endif; ?>
 <?php
 //todo добавить подключение кнопки редактирования и удаления
 ?>

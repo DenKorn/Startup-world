@@ -15,12 +15,12 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin();
           $commonTemplate = "{input}\n\n{hint}\n\n{error}";
     ?>
-    <h3>Заголовок темы</h3>
+    <h4>Заголовок темы</h4>
         <?= $form->field($themeModel, 'title',
         ['template' => $commonTemplate])->textInput()
         ->hint('Длина заголовка до 150 символов.') ?>
 
-    <h3>Тело вашего сообщения</h3>
+    <h4>Тело вашего сообщения</h4>
     <?= $form->field($themeModel->rootMessage, 'content',
         ['template' => $commonTemplate])->textInput()
         ->hint('Длина сообщения до 1500 символов.') ?>

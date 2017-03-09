@@ -19,13 +19,16 @@ class ProfileController extends \yii\web\Controller
      *
      * @param $user_id integer
      * @param $isBlock integer
+     * @return array
      */
     public function actionBlockUser($user_id, $isBlock, $reason = "")
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
         //todo ограничение по ролям
-        //todo не заблокирован ли сам модератор
+        $initiatorUserModel = ForumBanList::findOne(['user_id' => $user_id]);
+        if($initiatorUserModel) return ['result' => 'error', 'message' => 'Вы не можете блокировать пользователя, будучи сами заблокированным.'];
+
         if($user_id == Yii::$app->user->id) return ['result' => 'error', 'message' => 'Нельзя блокировать/разюлокировать самого себя!'];
 
         $banRecord = ForumBanList::findOne(['user_id' => $user_id]);
@@ -58,6 +61,7 @@ class ProfileController extends \yii\web\Controller
 
                 return ['result' => 'ok', 'message' => 'Пользователь разблокирован.'];
         }
+        return null;
     }
 
     /**

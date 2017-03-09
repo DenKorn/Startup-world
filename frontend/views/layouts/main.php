@@ -86,11 +86,16 @@ $clientModel = User::findOne(Yii::$app->user->id);
 $id = 'null';
 $login = 'null';
 $role = 'null';
+$banned = 'false';
 
 if($clientModel) {
     $id = $clientModel->id;
     $login = $clientModel->username;
     $role = $clientModel->role;
+
+    if(\common\models\ForumBanList::findOne(['user_id' => $clientModel->id])) {
+     $banned = 'true';
+    }
 }
 
 $script = <<< JS
@@ -98,6 +103,7 @@ window.API_BASE_LINK = "$apiBaseUrl";
 window.CLIENT_ID = $id;
 window.CLIENT_LOGIN = '$login';
 window.CLIENT_ROLE = '$role';
+window.CLIENT_BANNED = $banned;
 JS;
 
 $this->registerJs($script,$this::POS_HEAD);

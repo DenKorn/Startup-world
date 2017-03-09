@@ -157,21 +157,21 @@ let messagingController = (function () {
             : '';
 
         //добавление кнопки "редактировать"
-        let edit_btn = window.CLIENT_ID && element.editable ?
+        let edit_btn = !window.CLIENT_BANNED && window.CLIENT_ID && element.editable ?
             `<a onclick="messagingController.prepareModal(${element.msg_id},${MODAL_ACTION_UPDATE})" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Редактировать</a>`
             : '';
 
         //добавление кнопки "удалить"
-        let delete_btn = window.CLIENT_ID && element.editable ?
+        let delete_btn = !window.CLIENT_BANNED && window.CLIENT_ID && element.editable ?
             `<a onclick="messagingController.deleteMessage(${element.msg_id})" class="btn btn-default btn-xs">Удалить</a>`
             : '';
 
         //добавление кнопки "ответить"
-        let respond_btn = window.CLIENT_ID ?
+        let respond_btn = !window.CLIENT_BANNED && window.CLIENT_ID ?
             `<a onclick="messagingController.prepareModal(${element.msg_id},${MODAL_ACTION_SEND})" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal">Ответить</a>`
             : '';
 
-        let voting_block = window.CLIENT_ID && (element.rating || element.rating === 0) ? `<div class="voting">
+        let voting_block = !window.CLIENT_BANNED && window.CLIENT_ID && (element.rating || element.rating === 0) ? `<div class="voting">
          <span class="rate${element.voting_choise == 0 ? '' : ' rated-by-user'}">${element.rating}</span>
          <div onclick="messagingController.vote(${element.msg_id}, 'up')" class="triangle-up${element.voting_choise == VOTING_FOLD ? ' triangle-up-selected ' : ''}"></div> 
          <div onclick="messagingController.vote(${element.msg_id}, 'down')" class="triangle-down${element.voting_choise == -VOTING_FOLD ? ' triangle-down-selected ' : ''}"></div>
@@ -218,7 +218,6 @@ let messagingController = (function () {
         $.get(getQueryLink("ajax-load-branch"),{id:rootNodeId})
             .done(
                 (tree)=>{
-                    console.log(tree);
                     renderMsgTree(tree, (rootNodeId === window.ROOT_MSG_ID) ? undefined : document.querySelector(`#message-${rootNodeId}`));
                     let expBtnElem = document.querySelector(`#message-${rootNodeId} .message-expand-btn`);
                     if(expBtnElem) expBtnElem.remove();
