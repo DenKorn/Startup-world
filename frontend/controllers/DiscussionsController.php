@@ -59,7 +59,7 @@ class DiscussionsController extends Controller
     public function actionIndex($id = 0)
     {
         if($id == 0) {
-            return $this->goBack();
+            return $this->redirect(['forum/index']);
         }
         //проверка наличия запраиваемой темы форума (корневого сообщения):
         $rootMsgModel = ForumMessages::findOne(['root_theme_id' => $id]);
@@ -88,6 +88,7 @@ class DiscussionsController extends Controller
             'rootMsgId' => $rootMsgModel->id,
             'discussionTitle' => ForumRoots::findOne($id)->title,
             'discussionInitiatorUsername' => $theme_author->username,
+            'discussionInitiatorId' => $theme_author->id,
             'rootMsgModel' => $rootMsgModel->getTreeStruct(0),
             'clientModel' => $clientModel,
         ]);
@@ -127,7 +128,7 @@ class DiscussionsController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         //проверка того, что пользователь залогинен:
-        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: ваш аккаунт заблокирован или не существует.'];
+        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: вы не вошли на сайт!'];
 
         $messageToRespond = ForumMessages::findOne($respond_to);
         //проверка существования сообщения, на которое пытаемся написать ответ:
@@ -144,11 +145,14 @@ class DiscussionsController extends Controller
         $newMsg = new ForumMessages(['content' => $content, 'parent_message_id' => $respond_to, 'user_id' => Yii::$app->user->id]);
         if (!$newMsg->save()) return ['result' => 'error', 'code' => 3, 'message' => 'Не удалось сохранить сообщение в базу данных.'];
 
-        //перед возвратом результата об успешной отправке также нужно добавить в список уведомлений уведомление автору подветки
-        $methodLink = Url::home(true).'/discussions/search-for-message?id='.$respond_to;
-        $login = User::findOne(Yii::$app->user->id)->username;
-        $cuttedRespond = mb_strimwidth($content, 0, 100, '...');
-        ForumNotifications::createNotification($messageToRespond->user_id,"@$login ответил вам:<br>$cuttedRespond<br><a href='$methodLink'>читать</a>",'alert',$respond_to);
+        // перед возвратом результата об успешной отправке также нужно добавить в список уведомлений уведомление автору подветки
+        // исключая при этом уведомление, если пользователь написал ответ на своё же сообщение
+        if($messageToRespond->user_id != Yii::$app->user->id) {
+            $methodLink = Url::home(true).'/discussions/search-for-message?id='.$respond_to;
+            $login = User::findOne(Yii::$app->user->id)->username;
+            $cuttedRespond = mb_strimwidth($content, 0, 100, '...');
+            ForumNotifications::createNotification($messageToRespond->user_id,"@$login ответил вам:<br>$cuttedRespond<br><a href='$methodLink'>читать</a>",'alert',$respond_to);
+        }
 
         return [
             'result' => 'ok',

@@ -3,7 +3,7 @@ use frontend\assets\DiscussionAsset;
 DiscussionAsset::register($this);
 $this->title = 'Форум - '.$discussionTitle;
 ?>
-<div class="message-user">@<?= $discussionInitiatorUsername ?></div>
+<a  href="profile?id=<?= $discussionInitiatorId ?>" class="message-user">@<?= $discussionInitiatorUsername ?></a>
 <div class="message-created-time"><?= $rootMsgModel->created_at ?></div>
 <h4><strong>Тема:</strong> <?= $discussionTitle ?></h4>
 <p style="margin:0"><strong>Содержание:</strong> <?= $rootMsgModel->content ?></p>

@@ -7,7 +7,7 @@
  */
 let messagingController = (function () {
 
-    //for messages interacting
+    //для взаимодействия с сообщениями
     let lastInteractedMessageId = 0;
     let currentAction = 0; // 0 - send, 1 - edit (2 - delete - возможен только тогда же, когда возможен и edit)
 
@@ -21,6 +21,9 @@ let messagingController = (function () {
     const MODAL_MSG_INPUT_ELEMENT = document.querySelector('#respond-message');
 
     const msgContainer = document.querySelector('.messages-common-container');
+
+    const modalFormHeader = document.querySelector('#myModal .modal-title');
+    const modalRespondMessageField = document.querySelector('#respond-message');
 
     function getQueryLink(additionalSublink) {
         return window.API_BASE_LINK + '/discussions/' + additionalSublink;
@@ -175,9 +178,9 @@ let messagingController = (function () {
          </div>` : '';
 
         messageContainer.innerHTML = `
-        <div class="message-block" id="message-${element.msg_id}">
+        <div class="message-block ${ (window.CLIENT_ID && element.user_id == window.CLIENT_ID) ? "message-own" : ""}" id="message-${element.msg_id}">
             <div class="message-header">
-                <div class="message-user">@${element.user_login}</div>
+                <a href="profile?id=${element.user_id}" class="message-user">@${element.user_login}</a>
                 <div class="message-created-time">${element.created_at}</div>
                 ${voting_block}
             </div>
@@ -230,26 +233,31 @@ let messagingController = (function () {
 
     /**
      * Вызывается для инициализации глобальных переменных перед вызовом модального окна
-     * @param usedMessageId
-     * @param action
+     * @param usedMessageId string
+     * @param action string
+     * @param author_login string
      */
     function prepareModal(usedMessageId, action = MODAL_ACTION_SEND, author_login = null) {
         lastInteractedMessageId = usedMessageId;
         currentAction = action;
         switch (action) {
             case MODAL_ACTION_SEND : {
-
-                let userNameBlock = document.querySelector(`#message-${usedMessageId} .message-user`);
-                let username = userNameBlock ? userNameBlock.innerHTML : '@not_found';
-                document.querySelector('#myModal .modal-title').innerHTML = 'Ответить пользователю ' + username;
+                if(author_login) {
+                    modalFormHeader.innerHTML = 'Ответить пользователю ' + author_login;
+                } else {
+                    let userNameBlock = document.querySelector(`#message-${usedMessageId} .message-user`);
+                    let username = userNameBlock ? userNameBlock.innerHTML : '@not_found';
+                    modalFormHeader.innerHTML = 'Ответить пользователю ' + username;
+                }
                 break;
             }
             case MODAL_ACTION_UPDATE : {
-                document.querySelector('#myModal .modal-title').innerHTML = `Редактировать своё сообщение`;
+                modalFormHeader.innerHTML = `Редактировать своё сообщение`;
                 MODAL_MSG_INPUT_ELEMENT.value = document.querySelector(`#message-${usedMessageId} .message-text`).innerHTML;
                 break;
             }
         }
+        modalRespondMessageField.focus(); //установим фокус на поле ввода открывающейся модальной формы
     }
 
     function deleteMessage(msg_id) {
@@ -350,9 +358,9 @@ let messagingController = (function () {
 
         const MAX_MSG_LENGTH = 1500;
         const MIN_MSG_LENGTH = 1;
-        let inputValue = document.querySelector('#respond-message').value;
-        switch (currentAction) { //отправка сообщения
-            case MODAL_ACTION_SEND : {
+        let inputValue = modalRespondMessageField.value;
+        switch (currentAction) {
+            case MODAL_ACTION_SEND : { //отправка сообщения
                 if(inputValue.length <= MAX_MSG_LENGTH) {
                     if(inputValue.length >= MIN_MSG_LENGTH) {
                         sendMessage(lastInteractedMessageId,inputValue);

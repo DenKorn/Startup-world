@@ -33,8 +33,12 @@
 }
 
 .message-block {
-    padding-top: 0.2em;
-    padding-bottom: 0.2em;
+    padding: 0.3em;
+    border-radius: 0.5em;
+}
+
+.message-own {
+    background-color: aliceblue;
 }
 
 .message-created-time {
