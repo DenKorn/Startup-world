@@ -7,16 +7,9 @@
  */
 
 $PROFILE_CONTROLLER_NAME = 'profileController';
-
-if($isOwnProfile) {
-    $this->registerJsFile(
-        '@web/js/profile-controller.js',
-        ['depends' => [\yii\web\JqueryAsset::className()]]
-    );
-}
 ?>
 
-<div class="row col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-6" style="margin-right: 0">
+<div class="row col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-6">
     <div class="panel panel-default">
         <div class="panel-body">
             <?php //компоненты первой панели настроек

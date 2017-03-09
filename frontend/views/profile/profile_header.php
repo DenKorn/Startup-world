@@ -5,6 +5,7 @@
  * @var $isBanned boolean
  * @var $userInfo \common\models\User
  */
+
 ?>
 
 <div class="row col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-12">
@@ -15,11 +16,11 @@
                 '<span style="font-size: 1.3em; color: green">online</span>' :
                 '<span style="font-size: 1.3em; color: grey">offline</span>' ?>
             <?php if($isAbleToBanOrWrite): ?>
-                <a href="javascript:void(0)" class="btn btn-raised btn-warning btn-sm" style="margin: 0px 5px 0px;">Уведомление</a>
+                <a href="javascript:void(0)" class="btn btn-raised btn-warning btn-sm" style="margin: 0px 5px 0px;"  onclick="profileController.notifyUser()">Уведомление</a>
                 <?php if($isBanned): ?>
-                    <a href="javascript:void(0)" class="btn btn-raised btn-primary btn-sm" style="margin: 0px 5px 0px;">Разблокировать</a>
+                    <a href="javascript:void(0)" class="btn btn-raised btn-primary btn-sm" style="margin: 0px 5px 0px;" onclick="profileController.setBanStatus(false)">Разблокировать</a>
                 <?php else: ?>
-                    <a href="javascript:void(0)" class="btn btn-raised btn-danger btn-sm" style="margin: 0px 5px 0px;">Заблокировать</a>
+                    <a href="javascript:void(0)" class="btn btn-raised btn-danger btn-sm" style="margin: 0px 5px 0px;" onclick="profileController.setBanStatus(true)">Заблокировать</a>
                 <?php endif; ?>
 
                 <?= $isOnline ? '' : "<span style='float: right'>Был в сети: $userInfo->last_activity</span>"?>

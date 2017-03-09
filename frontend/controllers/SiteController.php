@@ -71,10 +71,12 @@ class SiteController extends Controller
         $NOTIFICATIONS_SETTINGS = GeneralSettings::getSettingsObjByName('USER_NOTIFICATIONS');
 
         $alerts = ForumNotifications::getNotificationsForUser(Yii::$app->user->id, $NOTIFICATIONS_SETTINGS->min_notify_age_for_mailing_in_hours, 'alert', true);
+        $sysNotifications = ForumNotifications::getNotificationsForUser(Yii::$app->user->id, $NOTIFICATIONS_SETTINGS->min_notify_age_for_mailing_in_hours, 'system', true);
         $warnings = ForumNotifications::getNotificationsForUser(Yii::$app->user->id, $NOTIFICATIONS_SETTINGS->min_notify_age_for_mailing_in_hours, 'warning', true);
 
         return [
             'result' => 'ok',
+            'system' => $sysNotifications,
             'alerts' => $alerts,
             'warnings' => $warnings
             ];

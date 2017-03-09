@@ -2,7 +2,9 @@
 
 namespace frontend\controllers;
 
+use common\models\ForumBanList;
 use common\models\ForumMessages;
+use common\models\ForumNotifications;
 use common\models\ForumVotes;
 use common\models\User;
 use Yii;
@@ -10,11 +12,82 @@ use yii\web\Response;
 
 class ProfileController extends \yii\web\Controller
 {
-    //todo кнопка "заблокировать пользователя"
-    //todo кнопка "отправить пользователю оповещение"
 
     /**
-     * Формирует страницу профиля пользователя
+     * Блокирует лишь разблокирует пользователя в зависимости от второго аргумента
+     * 1 - блокировать, 2 - разблокировать
+     *
+     * @param $user_id integer
+     * @param $isBlock integer
+     */
+    public function actionBlockUser($user_id, $isBlock, $reason = "")
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
+        //todo ограничение по ролям
+        //todo не заблокирован ли сам модератор
+        if($user_id == Yii::$app->user->id) return ['result' => 'error', 'message' => 'Нельзя блокировать/разюлокировать самого себя!'];
+
+        $banRecord = ForumBanList::findOne(['user_id' => $user_id]);
+
+        $reloadMessage = '{ "command" : "reload", "parameter" : 5000 }';
+
+        switch ($isBlock) {
+            case 1:
+                if($banRecord) return ['result' => 'error', 'message' => 'Пользователь уже заблокирован!'];
+                $banRecord = new ForumBanList(['user_id' => $user_id, 'reason' => $reason]);
+                if(!$banRecord->save()) return ['result' => 'error', 'message' => 'Не удалось заблокировать пользователя!'];
+
+                $notification = new ForumNotifications(['recipient_id' => $user_id, 'type' => 'warning', 'message' => 'Вас забанили'.(strlen($reason) > 2 ? " за: ".$reason : "")]);
+                $notification->save();
+
+                $notification = new ForumNotifications(['recipient_id' => $user_id, 'type' => 'system', 'message' => $reloadMessage]);
+                $notification->save();
+
+                return ['result' => 'ok', 'message' => 'Пользователь заблокирован.'];
+
+            case 2:
+                if(!$banRecord) return ['result' => 'error', 'message' => 'Пользователь не был заблокирован!'];
+                if(!$banRecord->delete()) return ['result' => 'error', 'message' => 'Не удалось разблокировать пользователя!'];
+
+                $notification = new ForumNotifications(['recipient_id' => $user_id, 'type' => 'alert', 'message' => 'Вас разбанили, удачного общения!']);
+                $notification->save();
+
+                $notification = new ForumNotifications(['recipient_id' => $user_id, 'type' => 'system', 'message' => $reloadMessage]);
+                $notification->save();
+
+                return ['result' => 'ok', 'message' => 'Пользователь разблокирован.'];
+        }
+    }
+
+    /**
+     * Отправляет пользователю уведомление
+     *
+     * @param $user_id integer
+     * @param $message string
+     * @return array
+     */
+    public function actionNotifyUser($user_id, $message)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
+        //todo ограничение по ролям
+        //todo не заблокирован ли сам модератор
+
+        if($user_id == Yii::$app->user->id) return ['result' => 'error', 'message' => 'Нельзя отправлять уведомления самому себе!'];
+
+        $msg_length = strlen($message);
+        if($msg_length < 1) return ['result' => 'error', 'message' => 'Минимальная длина уведомления 1 символ!'];
+        if($msg_length > 255) return ['result' => 'error', 'message' => 'Максимальная длина уведомления 255 символов!'];
+
+        $notification = new ForumNotifications(['recipient_id' => $user_id, 'type' => 'alert', 'message' => $message]);
+        if(!$notification->save()) return ['result' => 'error', 'message' => 'Ошибка отправки уведомления пользователю!'];
+
+        return ['result' => 'ok', 'message' => 'Уведомление успешно отправлено'];
+    }
+
+    /**
+     * Формирует страницу профиля пользователacя
      *
      * @param null|integer $id
      * @return string
@@ -44,9 +117,11 @@ class ProfileController extends \yii\web\Controller
             return $this->render('not_found', ['requestedId' => $id]);
         }
 
-        $isBanned = false; //todo добавить проверку, заблокирован ли пользователь
+        $bannedRecord = ForumBanList::findOne(['user_id' => $id]);
+        $isBanned = $bannedRecord ? true : false;
+
         $isAbleToBanOrWrite = !Yii::$app->user->isGuest && !$isOwnProfile && (true /* todo проверка роли админа или модератора */);
-        $isAdmin = false; // todo добавить отдельную проверку
+        $isAdmin = false; // todo добавить отдельную проверку (не для целевого пользователя, а для того, кто запрашивает профиль)
 
         $ROLE_MAP = [
             'admin' => 'администратор',
@@ -63,7 +138,8 @@ class ProfileController extends \yii\web\Controller
             'isBanned' => $isBanned,
             'isAbleToBanOrWrite' => $isAbleToBanOrWrite,
             'isAdmin' => $isAdmin,
-            'roleName' => $roleName
+            'roleName' => $roleName,
+            'banReason' => ( $bannedRecord && $bannedRecord->reason ? $bannedRecord->reason : "")
         ];
 
         if(!$isBanned && $isOwnProfile) {
@@ -97,7 +173,7 @@ class ProfileController extends \yii\web\Controller
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не аутентифицированы!'];
         //todo проверка, находится ли пользователь в бан-листе
         //todo вынести в глобальные настройки мин. и макс. длину логина
-        if(strlen($newValue) < 4) return ['result' => 'error', 'message' => 'Слишком короткий логин! Минимальная допустимая длина: 4 символа'];
+        if(strlen($newValue) < 3) return ['result' => 'error', 'message' => 'Слишком короткий логин! Минимальная допустимая длина: 3 символа'];
         if(strlen($newValue) > 25) return ['result' => 'error', 'message' => 'Слишком длинный логин! Максимальная допустимая длина: 25 символов'];
 
         $userModel = User::findOne(['id' => Yii::$app->user->id]);

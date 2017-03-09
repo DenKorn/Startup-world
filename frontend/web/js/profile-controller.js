@@ -88,12 +88,14 @@ let profileController = (function () {
      * @param newValue string
      * @param okCallback function
      * @param errorCallback function
+     * @param queryObject Object
      * @returns {null}
      */
-    function performNewValueToServer(action, currentField, newValue, okCallback = null, errorCallback = null) {
+    function performNewValueToServer(action, currentField, newValue, okCallback = null, errorCallback = null, queryObject = null) {
         if(!action) return null;
+        let queryObj = queryObject ? queryObject : { newValue : newValue};
 
-        $.get(getQueryLink(action),{ newValue : newValue})
+        $.get(getQueryLink(action), queryObj)
             .done((respond)=>{
                 switch (respond.result) {
                     case 'ok':
@@ -115,8 +117,8 @@ let profileController = (function () {
                         console.error(`Непредвиденный результат ответа от сервера: "${respond}"`);
                 }
             })
-            .fail((error)=>{console.log("message updating error: ",error);
-                userNotifications.notify("Не выполнить запрос",NOTIFY_WARNING)});
+            .fail((error)=>{console.log("profile updating error: ",error);
+                userNotifications.notify("Не удалось выполнить запрос",NOTIFY_WARNING)});
     }
 
     /**
@@ -132,9 +134,9 @@ let profileController = (function () {
         
         switch (fieldId) {
             case 'user_login': {
-                if(field.inputLink.value.length < 4) { //todo мин. и макс. размер нового логина подтягивать из настроек сервера
+                if(field.inputLink.value.length < 3) { //todo мин. и макс. размер нового логина подтягивать из настроек сервера
                     toggleFieldStatus(field.formGroupLink, 'error');
-                    userNotifications.notify('Слишком короткий логин! Минимальная длина: 4 символа.', NOTIFY_WARNING);
+                    userNotifications.notify('Слишком короткий логин! Минимальная длина: 3 символа.', NOTIFY_WARNING);
                     break;
                 }
                 if(field.inputLink.value.length > 25) {
@@ -247,7 +249,53 @@ let profileController = (function () {
         }
     }
 
+    /**
+     * Позволяет банить пользователя или разбанивать его (в зависимости от аргумента)
+     * true - забанен, false - не забанен
+     *
+     * @param status boolean
+     */
+    function setBanStatus(status) {
+        let requestObj = {
+            user_id : window.PROFILE_TARGET_ID,
+            isBlock : status ? 1 : 2
+        }
+
+        if(status === true) {
+            let msg = prompt('Укажите причину блокировки пользователя.');
+            requestObj.reason = msg ? msg : "";
+        }
+        performNewValueToServer('block-user', null, null, function () {
+            setTimeout(()=>{location.reload();},5000);
+        }, null, requestObj);
+    }
+
+    /**
+     * Вызывает диалоговое окно для написания текста уведомлеения пользователя и затем отправляет его на сервер
+     */
+    function notifyUser() {
+        let msg = prompt('Введите сообщение для этого пользователя');
+        console.log(msg);
+        if(msg) {
+            if(msg.length < 1) {
+                userNotifications.notify('Минимальный размер сообщения 1 символ!',NOTIFY_WARNING);
+                return null;
+            }
+            if(msg.length > 255) {
+                userNotifications.notify('Максимальный размер сообщения 255 символов!',NOTIFY_WARNING);
+                return null;
+            }
+
+            performNewValueToServer('notify-user', null, null, null, null, {
+                user_id : window.PROFILE_TARGET_ID,
+                message : msg
+            });
+        }
+    }
+
     return {
-        updateFieldById: updateFieldById
+        updateFieldById: updateFieldById,
+        setBanStatus : setBanStatus,
+        notifyUser : notifyUser
     };
 })();

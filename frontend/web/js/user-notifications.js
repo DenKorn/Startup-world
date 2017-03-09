@@ -54,14 +54,27 @@ let userNotifications = (function () {
         });
     }
 
+    function processSystemNotifications(notifications) {
+        notifications.forEach((item) => {
+            let itemObj = JSON.parse(item);
+            switch (itemObj.command) {
+                case 'reload': setTimeout(()=> { location.reload() }, itemObj.parameter);
+                    break;
+                //todo добавить остальные возможные системные сообщения
+                default: console.error('Неизвестное системное уведомление от сервера: '+item);
+            }
+        });
+    }
+
     function AJAXCallback(evt) {
         let respond = JSON.parse(evt.target.responseText);
         if(!respond.result) return;
 
         switch (respond.result) {
             case 'ok':
-                if(respond.alerts) showNotifications(respond.alerts, NOTIFY_INFO);
-                if(respond.warnings) showNotifications(respond.warnings, NOTIFY_WARNING);
+                if(respond.system && respond.system.length > 0) processSystemNotifications(respond.system);
+                if(respond.alerts && respond.alerts.length > 0) showNotifications(respond.alerts, NOTIFY_INFO);
+                if(respond.warnings && respond.warnings.length > 0) showNotifications(respond.warnings, NOTIFY_WARNING);
                 break;
             case 'error':
                 notify(respond.message, NOTIFY_WARNING);
