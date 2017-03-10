@@ -26,7 +26,7 @@ class ProfileController extends \yii\web\Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
         //todo ограничение по ролям
-        $initiatorUserModel = ForumBanList::findOne(['user_id' => $user_id]);
+        $initiatorUserModel = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
         if($initiatorUserModel) return ['result' => 'error', 'message' => 'Вы не можете блокировать пользователя, будучи сами заблокированным.'];
 
         if($user_id == Yii::$app->user->id) return ['result' => 'error', 'message' => 'Нельзя блокировать/разюлокировать самого себя!'];

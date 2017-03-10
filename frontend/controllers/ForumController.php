@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\ForumBanList;
 use common\models\ForumMessages;
 use Yii;
 use common\models\ForumRoots;
@@ -45,28 +46,45 @@ class ForumController extends Controller
         ]);
     }
 
+    /**
+     * todo выдача нормального диалога об ошибке
+     *
+     * @return string|\yii\web\Response
+     */
     public function actionCreateTheme()
     {
+        //todo добавить обработку случая, когда зайти в этот диалог и что-то сделать пытается незалогиненный пользователь
         $themeModel = new ForumRoots();
         $params = Yii::$app->request->post();
         $msgModel = new ForumMessages();
-        if(isset($params['ForumRoots']) && isset($params['ForumMessages'])) {
-            $themeModel->load($params);
-            $tmLeng = strlen($themeModel->title);
-            if($tmLeng <= 150) {
-                if($tmLeng >= 1) {
-                    $msgModel->load($params);
-                    if($themeModel->save()) {
-                        $msgModel->root_theme_id = $themeModel->id;
-                        $msgModel->user_id = Yii::$app->user->id;
-                        if($msgModel->save()) {
-                            return $this->redirect(['discussions/index','id'=>$themeModel->id]);
-                        } //todo и ещё сообщение об ошибке, выводить параметром в отображение, который будет активировать показывание специального элемента с текстом сообщения
-                    }// return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]); //todo Добавить сообщения об ошибке
-                }// return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
-            } // return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
-        } else //todo серьезно, сообщения об ошибках надо выводить
-            return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel]);
+        $banned = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+
+        if(!(isset($params['ForumRoots']) && isset($params['ForumMessages']))) {
+            return $this->render('create_theme', ['msgModel'=>$msgModel, 'themeModel'=>$themeModel, 'isBanned' => $banned]);
+        }
+
+        if($banned) {
+            return 'Вы забанены и не можете создавать темы!';
+        }
+
+        $themeModel->load($params);
+        $tmLeng = strlen($themeModel->title);
+        if($tmLeng > 150 || $tmLeng < 1) {
+            return 'Предельный размер заголовка: от 1 до 150 символов!';
+        }
+
+        $msgModel->load($params);
+        if(!$themeModel->save()) {
+            return 'Не удалось создать тему: не сохранилась запись о теме!';
+        }
+        $msgModel->root_theme_id = $themeModel->id;
+        $msgModel->user_id = Yii::$app->user->id;
+        if(!$msgModel->save()) {
+            return 'Не удалось создать тему: не сохранилась запись о сообщении темы!';
+        }
+
+        return $this->redirect(['discussions/index','id'=>$themeModel->id]);
+
     }
 
     ///образец для загрузки

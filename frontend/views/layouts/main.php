@@ -44,7 +44,7 @@ $siteBundle = MaterialAsset::register($this);
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
+       if (! \common\models\ForumBanList::findOne(['user_id' => Yii::$app->user->id])) $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
         $menuItems[] = ['label' => 'Профиль', 'url' => ['/profile']];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
