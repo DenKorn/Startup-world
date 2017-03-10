@@ -43,10 +43,6 @@ return [
             'rules' => [
             ],
         ],
-        'authManager' => [
-            'class' => 'yii\rbac\DbManager',
-            'defaultRoles' => ['guest','user','moderator','admin'],
-        ],
     ],
     'params' => $params,
 ];

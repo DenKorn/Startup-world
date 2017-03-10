@@ -9,7 +9,6 @@ class m161227_171156_db_extending_1 extends Migration
         echo "'user' table extending:\n";
 
         $this->addColumn('user','user_mail','VARCHAR(200) NOT NULL');
-        $this->addColumn('user','role','VARCHAR(45) NULL');
         $this->addColumn('user','real_name','VARCHAR(60) NULL');
         $this->addColumn('user','real_surname','VARCHAR(60) NULL');
         $this->addColumn('user','last_activity','TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP');

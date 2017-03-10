@@ -69,6 +69,8 @@ class User extends ActiveRecord implements IdentityInterface
 
             //$this->mailer->sendWelcomeMessage($this, isset($token) ? $token : null); TODO сделать отсылку письма
            // $this->trigger(self::AFTER_REGISTER);
+            Yii::$app->authManager->assign(Yii::$app->authManager->getRole('user'), $this->id);
+
             return true;
         } catch (\Exception $e) {
             \Yii::warning($e->getMessage());

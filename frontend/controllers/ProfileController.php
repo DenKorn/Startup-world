@@ -180,7 +180,7 @@ class ProfileController extends \yii\web\Controller
         if(strlen($newValue) < 3) return ['result' => 'error', 'message' => 'Слишком короткий логин! Минимальная допустимая длина: 3 символа'];
         if(strlen($newValue) > 25) return ['result' => 'error', 'message' => 'Слишком длинный логин! Максимальная допустимая длина: 25 символов'];
 
-        $userModel = User::findOne(['id' => Yii::$app->user->id]);
+        $userModel = Yii::$app->user->identity;
 
         if($userModel->username == $newValue) return ['result' => 'error', 'message' => 'Вы не изменили свой логин!'];
 
@@ -201,7 +201,7 @@ class ProfileController extends \yii\web\Controller
         if(strlen($newValue) < 3) return ['result' => 'error', 'message' => 'Слишком короткая почта! Минимальная допустимая длина: 3 символа'];
         if(strlen($newValue) > 125) return ['result' => 'error', 'message' => 'Слишком длинная почта! Максимальная допустимая длина: 125 символов'];
 
-        $userModel = User::findOne(['id' => Yii::$app->user->id]);
+        $userModel = Yii::$app->user->identity;
 
         if($userModel->user_mail == $newValue) return ['result' => 'error', 'message' => 'Вы не изменили свой e-mail !'];
 
@@ -222,7 +222,7 @@ class ProfileController extends \yii\web\Controller
         if(strlen($newValue) < 4) return ['result' => 'error', 'message' => 'Слишком короткий пароль! Минимальная допустимая длина: 4 символа'];
         if(strlen($newValue) > 100) return ['result' => 'error', 'message' => 'Слишком длинная почта! Максимальная допустимая длина: 100 символов'];
 
-        $userModel = User::findOne(['id' => Yii::$app->user->id]);
+        $userModel = Yii::$app->user->identity;
         $userModel->setPassword($newValue);
         if(!$userModel->save()) return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];
 
@@ -240,7 +240,7 @@ class ProfileController extends \yii\web\Controller
         if(strlen($newValue) < 4) return ['result' => 'error', 'message' => 'Слишком короткое имя! Минимальная допустимая длина: 4 символа'];
         if(strlen($newValue) > 60) return ['result' => 'error', 'message' => 'Слишком длинное имя! Максимальная допустимая длина: 60 символов'];
 
-        $userModel = User::findOne(['id' => Yii::$app->user->id]);
+        $userModel = Yii::$app->user->identity;
         if($userModel->real_name == $newValue) return ['result' => 'error', 'message' => 'Вы не изменили своё имя.'];
         $userModel->real_name = $newValue;
         if(!$userModel->save()) return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];
@@ -259,7 +259,7 @@ class ProfileController extends \yii\web\Controller
         if(strlen($newValue) < 4) return ['result' => 'error', 'message' => 'Слишком короткая фамилия! Минимальная допустимая длина: 4 символа'];
         if(strlen($newValue) > 100) return ['result' => 'error', 'message' => 'Слишком длинная фамилия! Максимальная допустимая длина: 100 символов'];
 
-        $userModel = User::findOne(['id' => Yii::$app->user->id]);
+        $userModel = Yii::$app->user->identity;
         if($userModel->real_surname == $newValue) return ['result' => 'error', 'message' => 'Вы не изменили свою фамилию.'];
         $userModel->real_surname = $newValue;
         if(!$userModel->save()) return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];

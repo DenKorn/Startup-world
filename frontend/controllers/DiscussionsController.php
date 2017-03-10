@@ -83,7 +83,7 @@ class DiscussionsController extends Controller
                 ]);
             }
 
-        $clientModel = User::findOne(Yii::$app->user->id);
+        $clientModel = Yii::$app->user->identity;
         $banned = false;
 
         //проверка, не находится ли залогиненный пользователь в бан-листе
@@ -164,7 +164,7 @@ class DiscussionsController extends Controller
         // исключая при этом уведомление, если пользователь написал ответ на своё же сообщение
         if($messageToRespond->user_id != Yii::$app->user->id) {
             $methodLink = Url::home(true).'/discussions/search-for-message?id='.$respond_to;
-            $login = User::findOne(Yii::$app->user->id)->username;
+            $login = Yii::$app->user->identity->username;
             $cuttedRespond = mb_strimwidth($content, 0, 100, '...');
             ForumNotifications::createNotification($messageToRespond->user_id,"@$login ответил вам:<br>$cuttedRespond<br><a href='$methodLink'>читать</a>",'alert',$respond_to);
         }
