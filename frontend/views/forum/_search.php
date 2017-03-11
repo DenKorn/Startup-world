@@ -15,14 +15,15 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-        <div class="col-md-11">
-            <?= $form->field($model, 'title', ['template' => "{input}\n\n{hint}\n\n{error}"]) ?>
-        </div>
-        <div class="col-md-1 center-block">
-            <br>
-            <?= Html::submitButton('<i class="material-icons">search</i>', ['class' => 'btn btn-fab btn-fab-mini']) ?>
-        </div>
 
+    <div class="label-floating">
+        <div class="input-group">
+            <?= $form->field($model, 'title', ['template' => "{input}\n\n{hint}\n\n{error}"]) ?>
+            <span class="input-group-btn">
+     <?= Html::submitButton('<i class="material-icons">search</i>', ['class' => 'btn btn-fab btn-fab-mini']) ?>
+    </span>
+        </div>
+    </div>
 
     <?php ActiveForm::end(); ?>
 

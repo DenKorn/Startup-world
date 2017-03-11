@@ -91,6 +91,47 @@ class ForumMessages extends \yii\db\ActiveRecord
     }
 
     /**
+     * Выдаёт специфичное для сообщений форматирование, ограничивающее точность отображаемого времени по мере увеличения его давности
+     * В сообщении, оставленном более суток назад, будет отображаться не время, а день и месяц. В сообщении, оставленном более года назад,
+     * будет отображаться лишь название месяца и год, когда оставили сообщение
+     * todo сделать функцию мультиязычной с хранением возможных названий месяцев в БД
+     *
+     * @param $created_at string
+     * @return string
+     */
+    public static function formatCreationTime($created_at)
+    {
+        $MONTHS_INCL = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+        $MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+        $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
+        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));
+        $time_created_at = new DateTime($created_at);
+        $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютное количество времени в часах
+
+        if($interval < 24) {
+            $time_formatted = $time_created_at->format('H:i');
+        } elseif($interval < 8760) { //количество часов в году
+            $time_formatted = (+$time_created_at->format('d')).' '.$MONTHS_INCL[$time_created_at->format('m')-1];
+        } else {
+            $time_formatted = $MONTHS[$time_created_at->format('m')-1].' '.(+$time_created_at->format('Y'));
+        }
+
+        return $time_formatted;
+    }
+
+    /**
+     * Синтаксический сахар над функцией formatCreationTime. Сделан для упрощенного разового вызова извне модели.
+     *
+     * @param $msg_id int|string
+     * @return string
+     */
+    public static function getFormattedMsgCreationTime($msg_id)
+    {
+        return self::formatCreationTime(self::findOne(['root_theme_id' => $msg_id])->created_at);
+    }
+
+    /**
      * Получает id темы сообщения, в которой оно оставлено
      * Реализовано дико костыльно, лишь бы работало
      *
@@ -141,7 +182,7 @@ class ForumMessages extends \yii\db\ActiveRecord
         $tree->editable = $interval < $MSG_LIMITS->still_editable_during_hours && $tree->user_id == Yii::$app->user->id;
 
         $tree->parent_msg_id = $attribs['parent_message_id'];
-        $tree->created_at = $attribs['created_at'];
+        $tree->created_at = self::formatCreationTime($attribs['created_at']);
         $tree->content = $attribs['content'];
         $tree->subjected = [];
         $subjected = $nodeModel->getSubjectedMessages()->all();
