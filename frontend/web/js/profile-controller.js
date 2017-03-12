@@ -293,9 +293,25 @@ let profileController = (function () {
         }
     }
 
+    /**
+     * Отправляет запрос на сервер для установки нового статуса пользователю
+     *
+     * @param $user_id
+     * @param newRole
+     */
+    function setUserRole($user_id, newRole) {
+//confirm
+    }
+    
+    function handler(a) {
+        alert(a);
+    }
+
     return {
         updateFieldById: updateFieldById,
         setBanStatus : setBanStatus,
-        notifyUser : notifyUser
+        notifyUser : notifyUser,
+        setUserRole : setUserRole,
+        handler: handler
     };
 })();

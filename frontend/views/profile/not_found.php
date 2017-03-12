@@ -7,7 +7,8 @@
 $this->title = "Профиль #$requestedId не найден!";
 ?>
 
-<div class="row col-md-offset-2 col-md-8">
+<div class="row">
+<div class="col-md-offset-2 col-md-8">
     <div class="panel panel-default">
         <div class="panel-body text-center">
             <h3>Профиль пользователя #<?= $requestedId ?> не найден!</h3>
@@ -22,4 +23,5 @@ $this->title = "Профиль #$requestedId не найден!";
             <a class="btn btn-primary btn-lg" href="<?= \yii\helpers\Url::home(true).'/forum' ?>">Перейти к темам форума</a>
         </div>
     </div>
+</div>
 </div>

@@ -6,13 +6,15 @@
  * @var $isBanned boolean
  * @var $isAbleToBanOrWrite boolean
  * @var $isAdmin boolean
- * @var $roleName string
  * @var $banReason string
  * @var $stats array
+ * @var $targetUserRoles array
  * @var $isOwnProfile boolean
  */
 
-$this->title = ($isOwnProfile ? "Мой п" : "П" )."рофиль - @$userInfo->username".($roleName ? "($roleName)" : "");
+$roleName = array_key_exists('admin',$targetUserRoles) ? "администратор" : (array_key_exists('moderator',$targetUserRoles) ? "модератор" : null);
+
+$this->title = ($isOwnProfile ? "Мой п" : "П" )."рофиль - @$userInfo->username".($roleName ? " ($roleName)" : "");
 
 if($isOwnProfile || $isAbleToBanOrWrite) {
     $this->registerJsFile(
@@ -31,10 +33,12 @@ echo $this->render('profile_header',[
     'isAbleToBanOrWrite' => $isAbleToBanOrWrite,
     'isBanned' => $isBanned,
     'userInfo' => $userInfo,
+    'isOwnProfile' => $isOwnProfile
 ]);
 
 if($isBanned) {
-    echo $isOwnProfile ? $this->render('user_blocked_dialog_own', ['isBanned' => $isBanned, 'ban_reason' => $banReason]) : $this->render('user_blocked_dialog', ['showedForModerator' => $isAbleToBanOrWrite]);
+    echo $isOwnProfile ? $this->render('user_blocked_dialog_own', ['isBanned' => $isBanned, 'ban_reason' => $banReason])
+        : $this->render('user_blocked_dialog', ['showedForModerator' => $isAbleToBanOrWrite]);
 }
 
 if(!$isBanned || $isAbleToBanOrWrite) {
@@ -45,10 +49,15 @@ if(!$isBanned || $isAbleToBanOrWrite) {
     ]);
 
     if($isOwnProfile) {
-        echo $this->render('stats',[
+        echo $this->render('stats', [
             'stats' => $stats,
             'isOwnProfile' => $isOwnProfile
         ]);
     }
 }
 
+if($isAdmin && !$isOwnProfile) {
+    echo $this->render('choose_user_role', [
+        'roleName' => $roleName
+    ]);
+}

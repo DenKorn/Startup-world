@@ -25,10 +25,9 @@ class ProfileController extends \yii\web\Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
-        //todo ограничение по ролям
         $initiatorUserModel = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
+        if(!Yii::$app->user->can('moderator')) return ['result' => 'error', 'message' => 'Вы не владеете полномочиями для блокировки пользователя!'];
         if($initiatorUserModel) return ['result' => 'error', 'message' => 'Вы не можете блокировать пользователя, будучи сами заблокированным.'];
-
         if($user_id == Yii::$app->user->id) return ['result' => 'error', 'message' => 'Нельзя блокировать/разюлокировать самого себя!'];
 
         $banRecord = ForumBanList::findOne(['user_id' => $user_id]);
@@ -75,8 +74,8 @@ class ProfileController extends \yii\web\Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
-        //todo ограничение по ролям
-        //todo не заблокирован ли сам модератор
+        if(! Yii::$app->user->can('moderator')) return ['result' => 'error', 'message' => 'Вы не обладаете полномочиями для отправки уведомлений!'];
+        if(ForumBanList::findOne(['user_id' => Yii::$app->user->id])) return ['result' => 'error', 'message' => 'Вы заблокированы и не можете отправлять уведомленения!!'];
 
         if($user_id == Yii::$app->user->id) return ['result' => 'error', 'message' => 'Нельзя отправлять уведомления самому себе!'];
 
@@ -123,26 +122,19 @@ class ProfileController extends \yii\web\Controller
 
         $bannedRecord = ForumBanList::findOne(['user_id' => $id]);
         $isBanned = $bannedRecord ? true : false;
+        $isAbleToBanOrWrite = Yii::$app->user->can('moderator');
+        $isAdmin = Yii::$app->user->can('admin');
 
-        $isAbleToBanOrWrite = !Yii::$app->user->isGuest && !$isOwnProfile && (true /* todo проверка роли админа или модератора */);
-        $isAdmin = false; // todo добавить отдельную проверку (не для целевого пользователя, а для того, кто запрашивает профиль)
-
-        $ROLE_MAP = [
-            'admin' => 'администратор',
-            'moderator' => 'модератор',
-            'user' => 'пользователь'
-        ];
-
-        $roleName = 'Пользователь'; // todo получать роль
+        $targetUserRoles = Yii::$app->authManager->getRolesByUser($id);
 
         $renderingData = [
+            'targetUserRoles' => $targetUserRoles,
             'isOwnProfile' => $isOwnProfile,
             'userInfo' => $userInfo,
             'isOnline' => $userInfo->isOnline(),
             'isBanned' => $isBanned,
             'isAbleToBanOrWrite' => $isAbleToBanOrWrite,
             'isAdmin' => $isAdmin,
-            'roleName' => $roleName,
             'banReason' => ( $bannedRecord && $bannedRecord->reason ? $bannedRecord->reason : "")
         ];
 

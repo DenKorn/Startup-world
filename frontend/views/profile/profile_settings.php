@@ -9,7 +9,8 @@
 $PROFILE_CONTROLLER_NAME = 'profileController';
 ?>
 
-<div class="row col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-6">
+<div class="row">
+<div class="col-md-offset-1 col-md-5 col-lg-offset-0 col-lg-6">
     <div class="panel panel-default">
         <div class="panel-body">
             <?php //компоненты первой панели настроек
@@ -58,7 +59,7 @@ $PROFILE_CONTROLLER_NAME = 'profileController';
     </div>
 </div>
 
-<div class="row col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-6">
+<div class="col-md-offset-0 col-md-5 col-lg-offset-0 col-lg-6">
     <div class="panel panel-default">
         <div class="panel-body">
             <?php //компоненты второй панели настроек
@@ -101,23 +102,7 @@ $PROFILE_CONTROLLER_NAME = 'profileController';
                 ]);
             }
             ?>
-
-            <?php if($isAdmin): //todo обработчик для выбора (через RegistrateJS)?>
-
-            <div class="form-group">
-                <label for="select111" class="col-md-2 control-label">Select</label>
-
-                <div class="col-md-10">
-                    <select id="select111" class="form-control">
-                        <option>обычный пользователь</option>
-                        <option>модератор</option>
-                        <option>администратор</option>
-                    </select>
-                </div>
-            </div>
-
-            <?php endif; ?>
-
         </div>
     </div>
+</div>
 </div>

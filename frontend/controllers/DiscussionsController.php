@@ -134,31 +134,38 @@ class DiscussionsController extends Controller
     {
         //todo добавить контроль цензуры перед сохранением
 
-        if(!Yii::$app->request->isAjax) return $this->redirect(['forum/index']);
+        if(!Yii::$app->request->isAjax)
+            return $this->redirect(['forum/index']);
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         //проверка того, что пользователь залогинен:
-        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: вы не вошли на сайт!'];
+        if(!Yii::$app->user->id)
+            return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно отправить сообщение: вы не вошли на сайт!'];
 
         //проверка, не находится ли залогиненный пользователь в бан-листе
         $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
-        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно отправить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
+        if($banRecord)
+            return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно отправить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
 
         $messageToRespond = ForumMessages::findOne($respond_to);
         //проверка существования сообщения, на которое пытаемся написать ответ:
-        if(!$messageToRespond) return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для ответа не найдено.'];
+        if(!$messageToRespond)
+            return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для ответа не найдено.'];
 
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
 
         //проверка длины текста сообщения, слишком длинное и слишком короткое сообщение отказываемся сохранять:
         $msgLength = strlen($content);
-        if($msgLength > $MSG_LIMITS->max_message_length) return ['result' => 'error', 'code' => 2, 'message' => 'Превышена допустимая длина сообщения.'];
-        if($msgLength < $MSG_LIMITS->min_message_length) return ['result' => 'error', 'code' => 6, 'message' => 'Отправленое сообщение слишком короткое.'];
+        if($msgLength > $MSG_LIMITS->max_message_length)
+            return ['result' => 'error', 'code' => 2, 'message' => 'Превышена допустимая длина сообщения.'];
+        if($msgLength < $MSG_LIMITS->min_message_length)
+            return ['result' => 'error', 'code' => 6, 'message' => 'Отправленое сообщение слишком короткое.'];
 
         //Пробуем создать запись сообщения и сохранить её в БД:
         $newMsg = new ForumMessages(['content' => $content, 'parent_message_id' => $respond_to, 'user_id' => Yii::$app->user->id]);
-        if (!$newMsg->save()) return ['result' => 'error', 'code' => 3, 'message' => 'Не удалось сохранить сообщение в базу данных.'];
+        if (!$newMsg->save())
+            return ['result' => 'error', 'code' => 3, 'message' => 'Не удалось сохранить сообщение в базу данных.'];
 
         // перед возвратом результата об успешной отправке также нужно добавить в список уведомлений уведомление автору подветки
         // исключая при этом уведомление, если пользователь написал ответ на своё же сообщение
@@ -189,31 +196,39 @@ class DiscussionsController extends Controller
     {
         //todo добавить цензурирование
 
-        if(!Yii::$app->request->isAjax) return $this->redirect(['forum/index']);
+        if(!Yii::$app->request->isAjax)
+            return $this->redirect(['forum/index']);
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         //проверка того, что пользователь залогинен:
-        if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно обновить сообщение: вы не авторизовались на сайте!'];
+        if(!Yii::$app->user->id)
+            return ['result' => 'error', 'code' => 7, 'message' => 'Невозможно обновить сообщение: вы не авторизовались на сайте!'];
 
         //проверка, не находится ли залогиненный пользователь в бан-листе
         $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
-        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно обновить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
+        if($banRecord)
+            return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно обновить сообщение: вы заблокированы! Причина: '.$banRecord->reason.'.'];
 
         //проверка существования сообщения, которое пытаемся обновить:
         $targetMessage = ForumMessages::findOne($id);
-        if(! $targetMessage) return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для обновления не найдено.'];
+        if(! $targetMessage)
+            return ['result' => 'error', 'code' => 1, 'message' => 'Целевое сообщение для обновления не найдено.'];
 
         //проверка принадлежности рекактируемого сообщения автору:
-        if($targetMessage->user_id != Yii::$app->user->id) return ['result' => 'error', 'code' => 2, 'message' => 'Вы пытаетесь редактировать чужое сообщение.'];
+        if($targetMessage->user_id != Yii::$app->user->id
+        && ! Yii::$app->user->can('moderator'))
+            return ['result' => 'error', 'code' => 2, 'message' => 'Вы пытаетесь редактировать чужое сообщение.'];
 
         $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
         $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
 
-        //проверка срока давности сообщения с момента создания
-        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));;
-        $time_created_at = new DateTime($targetMessage->created_at);
-        $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютная разность времени в часах
-        if($interval > $MSG_LIMITS->still_editable_during_hours) return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для редактируемого сообщения.'];
+        //проверка срока давности сообщения с момента создания (для модераторов не нужна)
+        if(! Yii::$app->user->can('moderator')) {
+            $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));;
+            $time_created_at = new DateTime($targetMessage->created_at);
+            $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютная разность времени в часах
+            if($interval > $MSG_LIMITS->still_editable_during_hours) return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для редактируемого сообщения.'];
+        }
 
         //проверка длины текста, слишком длинное или слишком короткое сообщение отказываемся сохранять
         $msgLength = strlen($content);
@@ -230,6 +245,7 @@ class DiscussionsController extends Controller
     /**
      * Удаление существующего принадлежащего пользователю сообщения, с непросроченным сроком давности с момента создания.
      * (правило срока давности не касается админов или модераторов)
+     *
      * @param integer $id
      * @return mixed
      */
@@ -250,22 +266,25 @@ class DiscussionsController extends Controller
         //проверка того, что пользователь аутентифицирован
         if(!Yii::$app->user->id) return ['result' => 'error', 'code' => 2, 'message' => 'Невозможно удалить сообщение: вы не авторизовались на сайте!'];
 
-        //проверка принадлежности удаляемого сообщения автору
-        //todo поправку на доступ модератора
-        if($targetMessage->user_id != Yii::$app->user->id)
+        //проверка принадлежности удаляемого сообщения автору (если пользователь не модератор)
+        if($targetMessage->user_id != Yii::$app->user->id && ! Yii::$app->user->can('moderator'))
             return ['result' => 'error', 'code' => 7, 'message' => 'Вы пытаетесь удалить чужое сообщение.'];
 
-        $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
-        $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));
-        $time_created_at = new DateTime($targetMessage->created_at);
-        $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютное количество времени в часах
-        $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
+        //проверка давности сообщения для удаления (модератор может удалять сообщение любого возраста)
+        if(! Yii::$app->user->can('moderator')) {
+            $TIME_CONFIG = GeneralSettings::getSettingsObjByName('TIME');
+            $time_now = new DateTime(null, new DateTimeZone($TIME_CONFIG->server_timezone));
+            $time_created_at = new DateTime($targetMessage->created_at);
+            $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600; //абсолютное количество времени в часах
+            $MSG_LIMITS = GeneralSettings::getSettingsObjByName('MESSAGES_LIMITS');
 
-        //проверка срока давности с момента создания
-        if($interval > $MSG_LIMITS->still_editable_during_hours)
-            return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для удаления этого сообщения.'];
+            //проверка срока давности с момента создания
+            if($interval > $MSG_LIMITS->still_editable_during_hours)
+                return ['result' => 'error', 'code' => 3, 'message' => 'Истек допустимый срок для удаления этого сообщения.'];
+        }
 
-        if(!$targetMessage->delete()) return ['result' => 'error', 'code' => 4, 'message' => 'Не удалось удалить сообщение.'];
+        if(!$targetMessage->delete())
+            return ['result' => 'error', 'code' => 4, 'message' => 'Не удалось удалить сообщение.'];
 
         return ['result' => 'ok'];
     }
@@ -288,7 +307,8 @@ class DiscussionsController extends Controller
 
         //проверка, не находится ли залогиненный пользователь в бан-листе
         $banRecord = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
-        if($banRecord) return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно голосовать: вы заблокированы! Причина: '.$banRecord->reason.'.'];
+        if($banRecord)
+            return ['result' => 'error', 'code' => 13, 'message' => 'Невозможно голосовать: вы заблокированы! Причина: '.$banRecord->reason.'.'];
 
 
         if(abs($value) > 1 || $value == 0) {
@@ -306,14 +326,16 @@ class DiscussionsController extends Controller
             }
             //иначе, если ставим противоположную оценку - обновляем величину оценки в существующей записи в таблице
             $settedVote->value = $value;
-            if(!$settedVote->save()) return ['result' => 'error', 'message' => 'Ошибка изменения оценки', 'data' => $settedVote->getErrors()];
+            if(!$settedVote->save())
+                return ['result' => 'error', 'message' => 'Ошибка изменения оценки', 'data' => $settedVote->getErrors()];
 
             return ['result' => 'ok', 'message' => 'Рейтинг изменен на '.($value == 1 ? 'повышение' : 'понижение'), 'newVote' => $value, 'currentRating' => ForumVotes::getMessageSummaryRating($msg_id)];
         }
 
         $settedVote = new ForumVotes(['msg_id' => $msg_id, 'user_id' => Yii::$app->user->id, 'value' => $value]);
 
-        if(!$settedVote->save()) return ['result' => 'error', 'message' => 'Ошибка установки оценки', 'data' => $settedVote->getErrors()];
+        if(!$settedVote->save())
+            return ['result' => 'error', 'message' => 'Ошибка установки оценки', 'data' => $settedVote->getErrors()];
 
         return ['result' => 'ok', 'message' => 'Вы '.($value == 1 ? 'подняли' : 'понизили').' рейтинг сообщения.', 'newVote' => $value, 'currentRating' => ForumVotes::getMessageSummaryRating($msg_id)];
     }

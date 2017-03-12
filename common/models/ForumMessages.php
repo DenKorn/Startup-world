@@ -163,8 +163,13 @@ class ForumMessages extends \yii\db\ActiveRecord
         $user = User::findOne($tree->user_id);
         $tree->user_login = $user ? $user->username : null;
 
-        //TODO добавить инфу о роли пользователя (user_role)
-        $tree->user_role = 0; //0 - обычный пользователь, 1 - модератор, 2 - администратор
+        $tree->user_role = 'user';
+        if(Yii::$app->user->can('moderator')) {
+            $tree->user_role = 'moderator';
+        }
+        if(Yii::$app->user->can('admin')) {
+            $tree->user_role = 'admin';
+        }
 
         $tree->rating = ForumVotes::getMessageSummaryRating($attribs['id']);
 
@@ -178,8 +183,12 @@ class ForumMessages extends \yii\db\ActiveRecord
 
         $time_created_at = new DateTime($attribs['created_at']);
         $interval = ($time_now->getTimestamp() - $time_created_at->getTimestamp()) / 3600;
-        //todo добавить учитывание полномочий для модератора
-        $tree->editable = $interval < $MSG_LIMITS->still_editable_during_hours && $tree->user_id == Yii::$app->user->id;
+
+        // при расчете полномочий учитывается, не запрашивает ли переписку модератор/администратор
+        $tree->editable = Yii::$app->user->can('moderator')
+            || ($interval < $MSG_LIMITS->still_editable_during_hours
+                && $tree->user_id == Yii::$app->user->id
+                && Yii::$app->user->can('user'));
 
         $tree->parent_msg_id = $attribs['parent_message_id'];
         $tree->created_at = self::formatCreationTime($attribs['created_at']);
