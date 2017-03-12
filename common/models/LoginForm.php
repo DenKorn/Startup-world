@@ -60,6 +60,27 @@ class LoginForm extends Model
     }
 
     /**
+     * Выполняет вход пользователя в админ-панель, учитывая ограничение (залогиниться может лишь админ)
+     *
+     * @return bool whether the user is logged in successfully
+     */
+    public function loginAdminPanel()
+    {
+        $userModel = $this->getUser();
+
+        if ($this->validate() && Yii::$app->authManager->checkAccess($userModel->id, 'admin')) {
+            return Yii::$app->user->login($userModel, $this->rememberMe ? 3600 * 24 * 30 : 0);
+        } else {
+            Yii::$app->session->setFlash(
+                'error',
+                $userModel->username.', неверный логин/пароль, либо вы не обладаете полномочиями для входа в администраторскую панель!'
+            );
+
+            return false;
+        }
+    }
+
+    /**
      * Finds user by [[username]]
      *
      * @return User|null

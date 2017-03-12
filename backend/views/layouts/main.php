@@ -28,20 +28,25 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'Панель '.'администратора', //todo в зависимости от роли пользователя выводить "администратора" или "модератора"
+        'brandLabel' => 'Панель '.'администратора',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
+
     $menuItems = [ //todo сделать вывод ссылок в зависимости от роли пользователя (незалогиненым не показывать никаких вкладок вообще)
-        ['label' => 'Памятка администратора', 'url' => ['/site/index']], //todo добавить изменение надписи на модератора
-        ['label' => 'Пользователи', 'url' => ['/projects/index']],
-        ['label' => 'Бан-лист', 'url' => ['/contacts/index']],
-        ['label' => 'Активность', 'url' => ['/achievements/index']],
-        ['label' => 'Рассылка', 'url' => ['/common/index']],
-        ['label' => 'Настройки', 'url' => ['/activity/index']],
     ];
+
+    if (Yii::$app->user->can('admin')) {
+        $menuItems = [
+            ['label' => 'Активность', 'url' => ['/site/index']],
+            ['label' => 'Пользователи', 'url' => ['/projects/index']],
+            ['label' => 'Бан-лист', 'url' => ['/contacts/index']],
+            ['label' => 'Рассылка', 'url' => ['/common/index']],
+            ['label' => 'Настройки', 'url' => ['/activity/index']]];
+    }
+
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {

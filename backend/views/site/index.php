@@ -5,10 +5,9 @@ $this->title = 'My Yii Application';
 <div class="site-index">
 
     <div class="jumbotron">
-        <h1>Welcome!</h1>
+        <h2>Добро пожаловать!</h2>
 
-        <p class="lead">This is administration page of your portfolio! You can modify any content of your portfolio here and
-        then check out how much visitors you had</p>
+        <p class="lead">Если ты смог попасть сюда, значит ты на этом форуме - царь и бог. Помни это, заставь пользователей молиться на тебя! :)</p>
 
     </div>
 

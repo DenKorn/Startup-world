@@ -56,12 +56,34 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
+     * Проверка на предмет снятия с админа полномочий, для как можно более быстрого его выхода из системы
+     *
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        if(! Yii::$app->user->isGuest && !Yii::$app->user->can('admin')) {
+            Yii::$app->user->logout();
+            return true;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * По умолчанию мы отображаем залогиненому админу статистику, остальных перенаправляем на страницу входа
      *
      * @return string
      */
     public function actionIndex()
     {
+        // если вошел не админ - сразу посылаем его
+        if(! Yii::$app->user->can('admin')) {
+            return $this->redirect(['site/login']);
+        }
+
+        //отображение для админа страницы со статистикой
         return $this->render('index');
     }
 
@@ -76,7 +98,7 @@ class SiteController extends Controller
             return $this->goHome();
         }
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->loginAdminPanel()) {
             return $this->goBack();
         } else {
             return $this->render('login', [
