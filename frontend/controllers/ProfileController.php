@@ -19,11 +19,14 @@ class ProfileController extends \yii\web\Controller
      *
      * @param $user_id integer
      * @param $isBlock integer
-     * @return array
+     * @return array|Response
      */
     public function actionBlockUser($user_id, $isBlock, $reason = "")
     {
+        if(!Yii::$app->request->isAjax)
+            return $this->redirect(['/profile']);
         Yii::$app->response->format = Response::FORMAT_JSON;
+
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
         $initiatorUserModel = ForumBanList::findOne(['user_id' => Yii::$app->user->id]);
         if(!Yii::$app->user->can('moderator')) return ['result' => 'error', 'message' => 'Вы не владеете полномочиями для блокировки пользователя!'];
@@ -68,10 +71,13 @@ class ProfileController extends \yii\web\Controller
      *
      * @param $user_id integer
      * @param $message string
-     * @return array
+     * @return array|Response
      */
     public function actionNotifyUser($user_id, $message)
     {
+        if(!Yii::$app->request->isAjax)
+            return $this->redirect(['/profile']);
+
         Yii::$app->response->format = Response::FORMAT_JSON;
         if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не авторизованы!'];
         if(! Yii::$app->user->can('moderator')) return ['result' => 'error', 'message' => 'Вы не обладаете полномочиями для отправки уведомлений!'];
@@ -226,36 +232,87 @@ class ProfileController extends \yii\web\Controller
         if(!Yii::$app->request->isAjax) return $this->redirect(['/profile']);
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        if(!$newValue) return ['result' => 'error', 'message' => 'Вы не отправили новое имя!'];
-        if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не аутентифицированы!'];
-        //todo проверка, находится ли пользователь в бан-листе
-        if(strlen($newValue) < 4) return ['result' => 'error', 'message' => 'Слишком короткое имя! Минимальная допустимая длина: 4 символа'];
-        if(strlen($newValue) > 60) return ['result' => 'error', 'message' => 'Слишком длинное имя! Максимальная допустимая длина: 60 символов'];
+        if(!$newValue)
+            return ['result' => 'error', 'message' => 'Вы не отправили новое имя!'];
+        if(Yii::$app->user->isGuest)
+            return ['result' => 'error', 'message' => 'Вы не аутентифицированы!'];
+        if(ForumBanList::findOne(['user_id' => Yii::$app->user->id]))
+            return ['result' => 'error', 'message' => 'Вы не можете изменить своё имя, так как вы заблокированы!'];
+        if(strlen($newValue) < 4)
+            return ['result' => 'error', 'message' => 'Слишком короткое имя! Минимальная допустимая длина: 4 символа'];
+        if(strlen($newValue) > 60)
+            return ['result' => 'error', 'message' => 'Слишком длинное имя! Максимальная допустимая длина: 60 символов'];
 
         $userModel = Yii::$app->user->identity;
-        if($userModel->real_name == $newValue) return ['result' => 'error', 'message' => 'Вы не изменили своё имя.'];
+        if($userModel->real_name == $newValue)
+            return ['result' => 'error', 'message' => 'Вы не изменили своё имя.'];
         $userModel->real_name = $newValue;
-        if(!$userModel->save()) return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];
+        if(!$userModel->save())
+            return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];
 
         return ['result' => 'ok', 'message' => "Ваше имя успешно изменено."];
     }
 
     public function actionChangeSecondName($newValue = null)
     {
-        if(!Yii::$app->request->isAjax) return $this->redirect(['/profile']);
+        if(!Yii::$app->request->isAjax)
+            return $this->redirect(['/profile']);
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        if(!$newValue) return ['result' => 'error', 'message' => 'Вы не отправили новую фамилию!'];
-        if(Yii::$app->user->isGuest) return ['result' => 'error', 'message' => 'Вы не аутентифицированы!'];
-        //todo проверка, находится ли пользователь в бан-листе
-        if(strlen($newValue) < 4) return ['result' => 'error', 'message' => 'Слишком короткая фамилия! Минимальная допустимая длина: 4 символа'];
-        if(strlen($newValue) > 100) return ['result' => 'error', 'message' => 'Слишком длинная фамилия! Максимальная допустимая длина: 100 символов'];
+        if(!$newValue)
+            return ['result' => 'error', 'message' => 'Вы не отправили новую фамилию!'];
+        if(Yii::$app->user->isGuest)
+            return ['result' => 'error', 'message' => 'Вы не аутентифицированы!'];
+        if(ForumBanList::findOne(['user_id' => Yii::$app->user->id]))
+            return ['result' => 'error', 'message' => 'Вы не можете изменить свою фамилию, так как вы заблокированы!'];
+        if(strlen($newValue) < 4)
+            return ['result' => 'error', 'message' => 'Слишком короткая фамилия! Минимальная допустимая длина: 4 символа'];
+        if(strlen($newValue) > 100)
+            return ['result' => 'error', 'message' => 'Слишком длинная фамилия! Максимальная допустимая длина: 100 символов'];
 
         $userModel = Yii::$app->user->identity;
-        if($userModel->real_surname == $newValue) return ['result' => 'error', 'message' => 'Вы не изменили свою фамилию.'];
+        if($userModel->real_surname == $newValue)
+            return ['result' => 'error', 'message' => 'Вы не изменили свою фамилию.'];
         $userModel->real_surname = $newValue;
-        if(!$userModel->save()) return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];
+        if(!$userModel->save())
+            return ['result' => 'error', 'message' => 'Непредвиденная ошибка сохранения.'];
 
         return ['result' => 'ok', 'message' => "Ваша фамилия успешно изменёна."];
+    }
+
+    public function actionSetUserRole($user_id, $new_role)
+    {
+        if(!Yii::$app->request->isAjax)
+            return $this->redirect(['/profile']);
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if(!Yii::$app->user->can('admin'))
+            return ['result' => 'error', 'message' => 'Вы не обладаете полномочиями администратора для совершения этого действия!'];
+
+        if(ForumBanList::findOne(['user_id' => Yii::$app->user->id]))
+            return ['result' => 'error', 'message' => 'Вы не можете ничего сделать, так как вы заблокированы!'];
+
+        if(!User::findOne(['id' => $user_id]))
+            return ['result' => 'error', 'message' => 'Целевой пользователь не найден!'];
+
+        if(Yii::$app->user->id == $user_id)
+            return ['result' => 'error', 'message' => 'Вы не можете меня собственную роль!'];
+
+        if($new_role != 'admin' && $new_role != 'user' && $new_role != 'moderator')
+            return ['result' => 'error', 'message' => "Неизвестное название роли $new_role !"];
+
+        Yii::$app->authManager->revokeAll($user_id);
+        Yii::$app->authManager->assign(Yii::$app->authManager->getRole($new_role),$user_id);
+
+        $NEW_ROLE_MAP = [
+            'admin' => 'администратора',
+            'moderator' => 'модератора',
+            'user' => 'обычного пользователя'
+        ];
+
+        $notification = new ForumNotifications(['recipient_id' => $user_id, 'type' => 'alert', 'message' => "Ваша роль изменена на $NEW_ROLE_MAP[$new_role]"]);
+        $notification->save();
+
+        return ['result' => 'ok', 'message' => "Роль пользователя успешно изменена на $NEW_ROLE_MAP[$new_role]!"];
     }
 }

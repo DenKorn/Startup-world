@@ -58,6 +58,6 @@ if(!$isBanned || $isAbleToBanOrWrite) {
 
 if($isAdmin && !$isOwnProfile) {
     echo $this->render('choose_user_role', [
-        'roleName' => $roleName
+        'targetUserRoles' => $targetUserRoles
     ]);
 }

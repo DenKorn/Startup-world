@@ -15,6 +15,8 @@ let profileController = (function () {
      */
     let fields = {};
 
+    let selectRoleField = null;
+
     /**
      * Статус поля ввода может визуально определяться цветовой подсветкой, для этого нужно добавлять/удалять в главном контейнере поля ввода
      * классы .has-error и .has-success
@@ -296,22 +298,46 @@ let profileController = (function () {
     /**
      * Отправляет запрос на сервер для установки нового статуса пользователю
      *
-     * @param $user_id
-     * @param newRole
+     * @param $user_id integer
+     * @param newRole string
      */
-    function setUserRole($user_id, newRole) {
-//confirm
+    function setUserRole(newRole) {
+        if(confirm(`Вы уверены, что хотите присвоить новую роль этому пользователю?`)) {
+            if(newRole === 'moderator' || newRole === 'user' || newRole === 'admin') {
+                let requestObj = {
+                    user_id : window.PROFILE_TARGET_ID,
+                    new_role : newRole
+                };
+                performNewValueToServer('set-user-role', null, null, function () {
+                    setTimeout(()=>{location.reload()},3000);
+                }, null, requestObj);
+            }
+        }
     }
-    
-    function handler(a) {
-        alert(a);
+
+    function init() {
+        selectRoleField = document.querySelector('#select_role');
+        if(selectRoleField) {
+            selectRoleField.addEventListener('change', function (evt) {
+                switch (evt.target.selectedIndex) {
+                    case 0: setUserRole('user');
+                        break;
+                    case 1: setUserRole('moderator');
+                        break;
+                    case 2: setUserRole('admin');
+                        break;
+                    default: console.error('Неизвестная дополнительная роль! Возможно, вы что-то изменили в системе ролей или в вёрстке?');
+                }
+            });
+        }
     }
+
+    init();
 
     return {
         updateFieldById: updateFieldById,
         setBanStatus : setBanStatus,
         notifyUser : notifyUser,
         setUserRole : setUserRole,
-        handler: handler
     };
 })();
