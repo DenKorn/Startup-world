@@ -7,10 +7,19 @@ use backend\assets\AppAsset;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
+use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 use common\widgets\Alert;
 
 AppAsset::register($this);
+
+$apiBaseUrl = Url::home(true);
+
+$script = <<< JS
+window.API_BASE_LINK = "$apiBaseUrl";
+JS;
+
+$this->registerJs($script,$this::POS_HEAD);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -28,7 +37,7 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'Панель '.'администратора',
+        'brandLabel' => 'Админ. панель',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
@@ -41,8 +50,7 @@ AppAsset::register($this);
     if (Yii::$app->user->can('admin')) {
         $menuItems = [
             ['label' => 'Активность', 'url' => ['/site/index']],
-            ['label' => 'Пользователи', 'url' => ['/projects/index']],
-            ['label' => 'Бан-лист', 'url' => ['/contacts/index']],
+            //['label' => 'Пользователи', 'url' => ['/projects/index']],
             ['label' => 'Рассылка', 'url' => ['/common/index']],
             ['label' => 'Настройки', 'url' => ['/activity/index']]];
     }
