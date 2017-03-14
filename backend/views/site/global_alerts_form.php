@@ -19,7 +19,7 @@ $this->registerJSFile('@web/js/global-alerts-controller.js',['position' => $this
         <div class="form-group">
             <label for="messageTextArea" class="col-md-2 control-label">Сообщение рассылки</label>
             <div class="col-md-10">
-                <textarea name="message" maxlength="255" class="form-control" rows="3" id="messageTextArea" onkeypress="globalAlertsController.keyPressHandler()"></textarea>
+                <textarea name="message" maxlength="255" class="form-control" rows="3" id="messageTextArea"></textarea>
                 <span class="help-block">Не забудьте также указать категорию пользователей, которым будет разослано это уведомление. По умолчанию уведомления рассылаются
                 лишь обычным пользователям. Пока что длина сообщения ограничена 255 символами, но вскоре мы это исправим!</span>
             </div>
@@ -37,7 +37,7 @@ $this->registerJSFile('@web/js/global-alerts-controller.js',['position' => $this
             </div>
         </div>
 
-        <div class="form-group" style="margin-top: 0;"> <!-- inline style is just to demo custom css to put checkbox below input above -->
+        <div class="form-group" style="margin-top: 0;">
             <div class="col-md-offset-2 col-md-10">
                 <div class="checkbox">
                     <label>
