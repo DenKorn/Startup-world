@@ -4,7 +4,6 @@ use yii\helpers\Html;
 
 $this->title = 'Статистика форума';
 $this->registerJsFile('https://www.gstatic.com/charts/loader.js');
-$this->registerJsFile('http://underscorejs.ru/underscore.js');
 $this->registerJsFile('@web/js/stats-controller.js');
 ?>
 

@@ -51,8 +51,9 @@ $this->registerJs($script,$this::POS_HEAD);
         $menuItems = [
             ['label' => 'Активность', 'url' => ['/site/index']],
             //['label' => 'Пользователи', 'url' => ['/projects/index']],
-            ['label' => 'Рассылка', 'url' => ['/common/index']],
-            ['label' => 'Настройки', 'url' => ['/activity/index']]];
+            ['label' => 'Рассылка', 'url' => ['/site/global-alert']],
+            //['label' => 'Настройки', 'url' => ['/activity/index']]
+        ];
     }
 
     if (Yii::$app->user->isGuest) {

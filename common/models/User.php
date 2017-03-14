@@ -54,6 +54,21 @@ class User extends ActiveRecord implements IdentityInterface
         return $interval < $maxOnlinePeriod+1000;
     }
 
+    /**
+     * Возвращает список id пользователей, по имени их роли. Метод создан, как более оптимальное решение, для подготовки перед
+     * массовой рассылой в админ-панели.
+     *
+     * @param $roleName
+     * @return array
+     */
+    public static function getUserIdListByRoleName($roleName)
+    {
+        return Yii::$app->db->createCommand("SELECT user_id as id FROM auth_assignment WHERE item_name = '$roleName'")->queryAll();
+    }
+
+    /**
+     * Регистрация пользователя
+     */
     public function registrate()
     {
 
@@ -62,13 +77,11 @@ class User extends ActiveRecord implements IdentityInterface
         }
 
         try {
-          //  $this->trigger(self::BEFORE_REGISTER);
             if (!$this->save()) {
                 return false;
             }
 
             //$this->mailer->sendWelcomeMessage($this, isset($token) ? $token : null); TODO сделать отсылку письма
-           // $this->trigger(self::AFTER_REGISTER);
             Yii::$app->authManager->assign(Yii::$app->authManager->getRole('user'), $this->id);
 
             return true;

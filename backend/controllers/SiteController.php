@@ -2,6 +2,8 @@
 namespace backend\controllers;
 
 
+use common\models\ForumNotifications;
+use common\models\User;
 use DateTime;
 use Yii;
 use yii\web\Controller;
@@ -113,6 +115,7 @@ class SiteController extends Controller
      * выдает топ 10 пользователей с самым высоким, и с самым низким рейтингом в виде двух массивов
      * @param $best_users boolean true - best users, false - worst users
      * @param $users_count int количество пользователей, топ которых будет отображаться
+     * @return array
      */
     public function actionGetOutstandingUsers($best_users, $users_count = 10)
     {
@@ -145,10 +148,9 @@ class SiteController extends Controller
     {
         if(! Yii::$app->user->isGuest && !Yii::$app->user->can('admin')) {
             Yii::$app->user->logout();
-            return true;
-        } else {
-            return true;
         }
+
+        return true;
     }
 
     /**
@@ -185,6 +187,71 @@ class SiteController extends Controller
                 'model' => $model,
             ]);
         }
+    }
+
+    private function renderAlertResult($result, $failReason = "неизвестно")
+    {
+        Yii::$app->session->setFlash(
+            ($result ? 'success' : 'error'),
+            'Ваше уведомление'.($result ? '' : ' не').' отправлено'.($result ? '.' : '! Причина: '.$failReason)
+        );
+
+        return $this->render('global_alerts_form');
+    }
+
+    /**
+     * Открывает страницу глобальной рассылки, а также выполняет глобальную рассылку некоторого сообщения всем пользователям определенной роли
+     * Текущему авторизованному пользователю оповещение не отправляется
+     * Для большей оптимальности получения списка пользователей для оповещения, получение массива id этих пользователей было сформировано в
+     * единый запрос, размещенный в модели User
+     *
+     * @param string $message
+     * @param $targetRole string
+     * @param  $mail_only string
+     * @return string
+     */
+    public function actionGlobalAlert($message = null, $targetRole = "user", $mail_only = null)
+    {
+        if($message) { // если произведена попытка отправки...
+            if(strlen($message) < 3)
+                return $this->renderAlertResult(false, 'Слишком короткое сообщение! Вы не ошиблись при отправке?');
+            if(strlen($message) == 3)
+                return $this->renderAlertResult(false, 'Какой смысл ты хотел вложить в эти три буквы, о лаконичный самурай?');
+            if(strlen($message) > 255)
+                return $this->renderAlertResult(false, 'Сожалеем, админ, но даже попытка поиграться с запросом не поможет. Пока нельзя писать сообщения длинней 255 строк!');
+            if($targetRole != "user" && $targetRole != "moderator" && $targetRole != "admin")
+                return $this->renderAlertResult(false, 'Неизвестное имя роли: '.$targetRole);
+
+            $mail_only = $mail_only == "on" ? 1 : 0;
+
+            $sendList = User::getUserIdListByRoleName($targetRole);
+            $listLength = count($sendList);
+            if($listLength == 0 ) {
+                return $this->renderAlertResult(false, 'Некому отправлять ваше сообщение, пользователи с такой ролью не найдены...');
+            }
+
+            if($listLength == 1 && $targetRole == "admin") {
+                return $this->renderAlertResult(false, 'Вы единственный администратор, нет смысла делать уведомление самому себе.');
+            }
+
+            for($i = 0; $i < $listLength; $i++) {
+                //при отправке оповещений админу-отправителю оно не приходит:
+                if((int)$sendList[$i]['id'] == Yii::$app->user->id)  continue;
+
+                $notification = new ForumNotifications([
+                    'recipient_id' => (int)$sendList[$i]['id'],
+                    'type' => 'alert',
+                    'message' => $message,
+                    'mail_only' => $mail_only
+                ]);
+
+                if(!$notification->save()) $this->renderAlertResult(false, var_export($notification->errors));
+            }
+
+            return $this->renderAlertResult(true);
+        }
+        // иначе отображаем страницу рассылки оповещения
+        return $this->render('global_alerts_form');
     }
 
     /**
