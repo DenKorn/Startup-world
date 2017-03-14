@@ -36,17 +36,22 @@ $siteBundle = MaterialAsset::register($this);
             'class' => 'navbar navbar-default navbar-fixed-top', // прежнее: navbar-inverse navbar-fixed-top
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Главная', 'url' => ['/site/index']],
-        ['label' => 'Темы форума', 'url' => ['/forum']],
-    ];
+    $menuItems = [];
+    if(Yii::$app->user->can('admin')) {
+        $menuItems[] = ['label' => 'Админ. панель', 'url' => ['/admin']];
+    }
+    $menuItems[] = ['label' => 'Главная', 'url' => ['/site/index']];
+    $menuItems[] = ['label' => 'Темы форума', 'url' => ['/forum']];
 
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
-       if (! \common\models\ForumBanList::findOne(['user_id' => Yii::$app->user->id])) $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
-        $menuItems[] = ['label' => 'Профиль', 'url' => ['/profile']];
-        $menuItems[] = '<li>'
+       if (! \common\models\ForumBanList::findOne(['user_id' => Yii::$app->user->id])) {
+           $menuItems[] = ['label' => 'Создать тему', 'url' => ['/forum/create-theme']];
+       }
+
+       $menuItems[] = ['label' => 'Профиль', 'url' => ['/profile']];
+       $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
                 'Выйти (' . Yii::$app->user->identity->username . ')',

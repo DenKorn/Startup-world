@@ -57,17 +57,18 @@ class ForumNotifications extends \yii\db\ActiveRecord
      * @param $msg_age integer
      * @param $msg_type string
      * @param $removeThen boolean
+     * @param bool $include_mail_only_notifications
      * @return static[]
      */
-    public static function getNotificationsForUser($user_id, $msg_age = 3, $msg_type = 'alert', $removeThen = false)
+    public static function getNotificationsForUser($user_id, $msg_age = 3, $msg_type = 'alert', $removeThen = false, $include_mail_only_notifications = false)
     {
-        $notifyRecords = self::find()->where(['recipient_id' => $user_id, 'type' => $msg_type])->
-            andWhere(['>=', 'sended_at', new Expression("DATE_SUB(CURRENT_TIMESTAMP, INTERVAL $msg_age HOUR )")])->all();
+        $notifyRecords = self::find()->where(['recipient_id' => $user_id, 'type' => $msg_type])
+            ->andWhere(['>=', 'sended_at', new Expression("DATE_SUB(CURRENT_TIMESTAMP, INTERVAL $msg_age HOUR )")])
+            ->andWhere(['mail_only' => $include_mail_only_notifications])
+            ->all();
 
-        $messages = array_map(function($record)
-        {
-            $message = $record->message;
-            return $message;
+        $messages = array_map(function($record) {
+            return $record->message;
         }, $notifyRecords);
 
         if($removeThen) {

@@ -52,6 +52,7 @@ $this->registerJs($script,$this::POS_HEAD);
             ['label' => 'Активность', 'url' => ['/site/index']],
             //['label' => 'Пользователи', 'url' => ['/projects/index']],
             ['label' => 'Рассылка', 'url' => ['/site/global-alert']],
+            ['label' => 'Мой профиль', 'url' => ['../profile?id='.Yii::$app->user->id]],
             //['label' => 'Настройки', 'url' => ['/activity/index']]
         ];
     }
