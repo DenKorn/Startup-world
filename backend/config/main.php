@@ -9,14 +9,14 @@ $params = array_merge(
 return [
     'id' => 'portfolio-app-backend',
     'basePath' => dirname(__DIR__),
-    'homeUrl' => '/startup-forum/admin',
+    'homeUrl' => '/admin',
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
     'modules' => [],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
-            'baseUrl' => '/startup-forum/admin',
+            //'baseUrl' => '/startup-forum/admin',
         ],
         'user' => [
             'identityClass' => 'common\models\User',
