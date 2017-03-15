@@ -8,14 +8,14 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
-    'homeUrl' => '/startup-forum',
+    'homeUrl' => '/',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
-            'baseUrl' => '/startup-forum',
+            //'baseUrl' => '',
         ],
         'user' => [
             'identityClass' => 'common\models\User',
