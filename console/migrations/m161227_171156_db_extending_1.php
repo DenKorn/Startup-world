@@ -72,7 +72,6 @@ ENGINE = InnoDB;
         $this->dropTable('forum_votes');
 
         $this->dropColumn('user','user_mail');
-        $this->dropColumn('user','role');
         $this->dropColumn('user','real_name');
         $this->dropColumn('user','real_surname');
         $this->dropColumn('user','last_activity');

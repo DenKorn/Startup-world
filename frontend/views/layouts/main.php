@@ -96,7 +96,7 @@ $banned = 'false';
 if($clientModel) {
     $id = $clientModel->id;
     $login = $clientModel->username;
-    $role = $clientModel->role;
+    $role = 'test';//$clientModel->role;
 
     if(\common\models\ForumBanList::findOne(['user_id' => $clientModel->id])) {
      $banned = 'true';
