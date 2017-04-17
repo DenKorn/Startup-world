@@ -40,6 +40,7 @@ $siteBundle = MaterialAsset::register($this);
     if(Yii::$app->user->can('admin')) {
         $menuItems[] = ['label' => 'Админ. панель', 'url' => ['/admin']];
     }
+    $menuItems[] = ['label' => 'Непонятно что', 'url' => ['/test-playground/index']];
     $menuItems[] = ['label' => 'Главная', 'url' => ['/site/index']];
     $menuItems[] = ['label' => 'Темы форума', 'url' => ['/forum']];
 
