@@ -1,6 +1,7 @@
 <?php
 /* @var $this yii\web\View */
 /* @var $tabulation TestTabulation */
+/* @var $testResults array */
 
 use yii\helpers\Html;
 use common\models\TestTabulation;
@@ -22,10 +23,10 @@ $this->title = 'Табулирование функции';
 <div class="row col-md-offset-1 col-md-10">
     <div class="panel panel-default center-block">
         <div class="panel-body">
-            <p>Значения элементов в индексах:</p>
+            <h3>Значения элементов в индексах:</h3>
             <p>0: <?= var_export($tabulation->getElementByNumber(0)) ?></p>
             <p>140: <?= var_export($tabulation->getElementByNumber(140)) ?></p>
-            <p>400: <?= var_export($tabulation->getElementByNumber(400)) ?></p>
+            <p>399: <?= var_export($tabulation->getElementByNumber(399)) ?></p>
             <br>
             <p>Количетво шагов для табулирования: <?= $tabulation->getStepsCount() ?></p>
             <p>Шаг: <?= $tabulation->getStep() ?></p>
@@ -47,6 +48,25 @@ $this->title = 'Табулирование функции';
 <div class="row col-md-offset-1 col-md-10">
     <div class="panel panel-default center-block">
         <div class="panel-body">
+            <h3>Результаты тестирования:</h3>
+            <? foreach ($testResults as $result): ?>
+                <p>
+                    <?=$result['description']?>:
+                    <? if($result['value'] == true): ?>
+                        <span class="label label-success">Ок</span>
+                    <? else: ?>
+                        <span class="label label-danger">Ошибка</span>
+                    <? endif; ?>
+                </p>
+            <? endforeach; ?>
+        </div>
+    </div>
+</div>
+
+<div class="row col-md-offset-1 col-md-10">
+    <div class="panel panel-default center-block">
+        <div class="panel-body">
+            <h3>Значения в виде графика:</h3>
             <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
             <div id="chart_div"></div>
             <script>
@@ -79,6 +99,34 @@ $this->title = 'Табулирование функции';
                     chart.draw(data, options);
                 }
             </script>
+        </div>
+    </div>
+</div>
+
+<div class="row col-md-offset-1 col-md-10">
+    <div class="panel panel-default center-block">
+        <div class="panel-body">
+            <h3>Значения всех элементов:</h3>
+            <div class="col-lg-6 col-lg-offset-3">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>X</th>
+                            <th>Y</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <? for ($i = 0; $i < $len; $i++): ?>
+                        <tr <?=($i == 0 || $i == 140 || $i == 399) ? 'class="success"' : '  '?>>
+                            <td><?=$i?></td>
+                            <td><?=$valX[$i]?></td>
+                            <td><?=$valY[$i]?></td>
+                        </tr>
+                    <? endfor; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

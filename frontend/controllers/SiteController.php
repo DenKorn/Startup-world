@@ -22,7 +22,7 @@ class SiteController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['login', 'error','index','sign-up','check-notifications'],
+                        'actions' => ['login', 'error','index','sign-up','check-notifications','contact-us'],
                         'allow' => true,
                     ],
                     [
@@ -125,5 +125,16 @@ class SiteController extends Controller
                 'model' => $userToSignUpForm
             ]);
         }
+    }
+
+    /**
+     * Ответственен за отправку запросов на почту администратора и отображение формы обратной связи
+     * // TODO: реализовать базовые валидации входных данных и отправку почты администратору
+     *
+     * @return string
+     */
+    public function actionContactUs()
+    {
+        return $this->render('contact_us');
     }
 }

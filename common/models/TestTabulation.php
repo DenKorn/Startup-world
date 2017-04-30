@@ -15,6 +15,28 @@ class TestTabulation
     private $sumCached = null;
     private $averageValueCached = null;
 
+    public function __construct($parameter, $leftBound, $rightBound)
+    {
+        $this->parameter = $parameter;
+        $this->bounds = [$leftBound, $rightBound];
+    }
+
+    /**
+     * Устанавливает границы и шаг табулирования
+     *
+     * @param $step
+     * @param $leftBound
+     * @param $rightBound
+     */
+    public function setConfig($step, $leftBound, $rightBound)
+    {
+        $this->step = $step;
+        $this->bounds[0] = $leftBound;
+        $this->bounds[1] = $rightBound;
+
+        $this->stepsCount = null;
+    }
+
     /**
      * Вычисляет значение y, основываясь на значении x и дополнительном параметре
      *
@@ -128,10 +150,10 @@ class TestTabulation
 
         if ( ! $this->minYValueIndexCached )
         {
-            $this->minYValueIndexCached = array_keys($valuesY, max($valuesY))[0];
+            $this->maxYValueIndexCached = array_keys($valuesY, max($valuesY))[0];
         }
 
-        return $this->minYValueIndexCached;
+        return $this->maxYValueIndexCached;
     }
 
     public function getMinElementIndex ()

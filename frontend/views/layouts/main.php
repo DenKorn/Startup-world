@@ -40,9 +40,10 @@ $siteBundle = MaterialAsset::register($this);
     if(Yii::$app->user->can('admin')) {
         $menuItems[] = ['label' => 'Админ. панель', 'url' => ['/admin']];
     }
-    $menuItems[] = ['label' => 'Непонятно что', 'url' => ['/test-playground/index']];
+    $menuItems[] = ['label' => '[Табулирование]', 'url' => ['/test-playground/index']];
     $menuItems[] = ['label' => 'Главная', 'url' => ['/site/index']];
     $menuItems[] = ['label' => 'Темы форума', 'url' => ['/forum']];
+    $menuItems[] = ['label' => 'Обратная связь', 'url' => ['/site/contact-us']];
 
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
@@ -97,7 +98,7 @@ $banned = 'false';
 if($clientModel) {
     $id = $clientModel->id;
     $login = $clientModel->username;
-    $role = 'test';//$clientModel->role;
+    $role = $clientModel->role;
 
     if(\common\models\ForumBanList::findOne(['user_id' => $clientModel->id])) {
      $banned = 'true';

@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-
+$this->title = 'Главная';
 ?>
 
 <div class="jumbotron">
