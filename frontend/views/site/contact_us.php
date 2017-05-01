@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
 
                     <div class="form-group">
-                        <label for="textArea" class="control-label">Textarea</label>
+                        <label for="textArea" class="control-label">Ваше сообщение</label>
                         <textarea class="form-control" rows="3" id="textArea"></textarea>
                     </div>
 
